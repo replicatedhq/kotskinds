@@ -20,8 +20,8 @@ package kotsclientset
 import (
 	"fmt"
 
-	kotsv1beta1 "github.com/replicatedhq/kots/kotskinds/client/kotsclientset/typed/kots/v1beta1"
-	kotsv1beta2 "github.com/replicatedhq/kots/kotskinds/client/kotsclientset/typed/kots/v1beta2"
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
+	kotsv1beta2 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta2"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

@@ -18,8 +18,8 @@ limitations under the License.
 package v1beta2
 
 import (
-	v1beta2 "github.com/replicatedhq/kots/kotskinds/apis/kots/v1beta2"
-	"github.com/replicatedhq/kots/kotskinds/client/kotsclientset/scheme"
+	v1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
+	"github.com/replicatedhq/kotskinds/client/kotsclientset/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

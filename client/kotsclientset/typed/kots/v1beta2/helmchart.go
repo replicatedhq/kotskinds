@@ -21,8 +21,8 @@ import (
 	"context"
 	"time"
 
-	v1beta2 "github.com/replicatedhq/kots/kotskinds/apis/kots/v1beta2"
-	scheme "github.com/replicatedhq/kots/kotskinds/client/kotsclientset/scheme"
+	v1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
+	scheme "github.com/replicatedhq/kotskinds/client/kotsclientset/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

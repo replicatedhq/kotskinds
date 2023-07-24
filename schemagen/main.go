@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/replicatedhq/kots/kotskinds/schemagen/cli"
+	"github.com/replicatedhq/kotskinds/schemagen/cli"
 )
 
 func main() {

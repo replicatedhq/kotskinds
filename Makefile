@@ -1,4 +1,4 @@
-include ../Makefile.build.mk
+include ./Makefile.build.mk
 
 .PHONY: generate
 generate: controller-gen client-gen
@@ -11,9 +11,9 @@ generate: controller-gen client-gen
 		paths=./apis/kots/v1beta1/... \
 		paths=./apis/kots/v1beta2/...
 	$(CLIENT_GEN) \
-		--output-package=github.com/replicatedhq/kots/kotskinds/client \
+		--output-package=github.com/replicatedhq/kotskinds/client \
 		--clientset-name kotsclientset \
-		--input-base github.com/replicatedhq/kots/kotskinds/apis \
+		--input-base github.com/replicatedhq/kotskinds/apis \
 		--input kots/v1beta1,kots/v1beta2 \
 		-h ./hack/boilerplate.go.txt
 
