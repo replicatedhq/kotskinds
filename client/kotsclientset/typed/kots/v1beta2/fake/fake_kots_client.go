@@ -18,7 +18,7 @@ limitations under the License.
 package fake
 
 import (
-	v1beta2 "github.com/replicatedhq/kots/kotskinds/client/kotsclientset/typed/kots/v1beta2"
+	v1beta2 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta2"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

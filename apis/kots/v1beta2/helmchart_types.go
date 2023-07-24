@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/replicatedhq/kots/kotskinds/multitype"
+	"github.com/replicatedhq/kotskinds/multitype"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

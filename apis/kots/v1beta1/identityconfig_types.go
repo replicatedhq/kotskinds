@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-	"github.com/replicatedhq/kots/pkg/crypto"
+	"github.com/replicatedhq/kotskinds/pkg/crypto"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"

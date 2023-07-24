@@ -19,7 +19,7 @@ package v1beta1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/replicatedhq/kots/kotskinds/multitype"
+	"github.com/replicatedhq/kotskinds/multitype"
 )
 
 type ConfigChildItem struct {

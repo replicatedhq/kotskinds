@@ -17,7 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/replicatedhq/kots/kotskinds/multitype"
+	"github.com/replicatedhq/kotskinds/multitype"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
