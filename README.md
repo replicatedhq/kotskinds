@@ -1,6 +1,6 @@
 # kotskinds
 
-This directory contains the definitions and clientsets for the kots.io kinds. These aren't CRDs and controllers, but are implemented as normal Kubernetes objects. This allows us to use the client-go and other functionality to parse and ensure conformance.
+This repository contains the definitions and clientsets for the kots.io kinds. These aren't CRDs and controllers, but are implemented as normal Kubernetes objects. This allows us to use the client-go and other functionality to parse and ensure conformance.
 
 ## Building
 
