@@ -1,5 +1,3 @@
-include ./Makefile.build.mk
-
 .PHONY: generate
 generate: controller-gen client-gen
 	$(CONTROLLER_GEN) \
