@@ -25,6 +25,7 @@ type InstallationSpec struct {
 	UpdateCursor             string                  `json:"updateCursor,omitempty"`
 	ChannelID                string                  `json:"channelID,omitempty"`
 	ChannelName              string                  `json:"channelName,omitempty"`
+	ReleaseSequence          int64                   `json:"releaseSequence,omitempty"`
 	VersionLabel             string                  `json:"versionLabel,omitempty"`
 	IsRequired               bool                    `json:"isRequired,omitempty"`
 	ReleaseNotes             string                  `json:"releaseNotes,omitempty"`

@@ -55,6 +55,9 @@ spec:
                 type: array
               releaseNotes:
                 type: string
+              releaseSequence:
+                format: int64
+                type: integer
               releasedAt:
                 format: date-time
                 type: string

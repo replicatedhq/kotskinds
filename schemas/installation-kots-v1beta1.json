@@ -46,6 +46,10 @@
         "releaseNotes": {
           "type": "string"
         },
+        "releaseSequence": {
+          "type": "integer",
+          "format": "int64"
+        },
         "releasedAt": {
           "type": "string",
           "format": "date-time"
