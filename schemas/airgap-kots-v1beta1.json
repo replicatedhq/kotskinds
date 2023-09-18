@@ -35,6 +35,10 @@
         "releaseNotes": {
           "type": "string"
         },
+        "releaseSequence": {
+          "type": "integer",
+          "format": "int64"
+        },
         "requiredReleases": {
           "type": "array",
           "items": {
@@ -43,6 +47,10 @@
             "properties": {
               "releaseNotes": {
                 "type": "string"
+              },
+              "releaseSequence": {
+                "type": "integer",
+                "format": "int64"
               },
               "updateCursor": {
                 "type": "string"

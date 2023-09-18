@@ -48,12 +48,18 @@ spec:
                 type: boolean
               releaseNotes:
                 type: string
+              releaseSequence:
+                format: int64
+                type: integer
               requiredReleases:
                 items:
                   description: AirgapStatus defines airgap release metadata
                   properties:
                     releaseNotes:
                       type: string
+                    releaseSequence:
+                      format: int64
+                      type: integer
                     updateCursor:
                       type: string
                     versionLabel:

@@ -35,9 +35,10 @@ type AirgapSpec struct {
 
 // AirgapStatus defines airgap release metadata
 type AirgapReleaseMeta struct {
-	VersionLabel string `json:"versionLabel,omitempty"`
-	ReleaseNotes string `json:"releaseNotes,omitempty"`
-	UpdateCursor string `json:"updateCursor,omitempty"`
+	ReleaseSequence int64  `json:"releaseSequence,omitempty"`
+	VersionLabel    string `json:"versionLabel,omitempty"`
+	ReleaseNotes    string `json:"releaseNotes,omitempty"`
+	UpdateCursor    string `json:"updateCursor,omitempty"`
 }
 
 // AirgapStatus defines the observed state of Airgap
