@@ -71,6 +71,10 @@ func (c *FakeKotsV1beta1) LintConfigs(namespace string) v1beta1.LintConfigInterf
 	return &FakeLintConfigs{c, namespace}
 }
 
+func (c *FakeKotsV1beta1) ReplicatedHelmCharts(namespace string) v1beta1.ReplicatedHelmChartInterface {
+	return &FakeReplicatedHelmCharts{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeKotsV1beta1) RESTClient() rest.Interface {

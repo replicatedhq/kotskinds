@@ -38,3 +38,5 @@ type InstallationExpansion interface{}
 type LicenseExpansion interface{}
 
 type LintConfigExpansion interface{}
+
+type ReplicatedHelmChartExpansion interface{}
