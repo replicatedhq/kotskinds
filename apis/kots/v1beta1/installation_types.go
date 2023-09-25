@@ -31,6 +31,7 @@ type InstallationSpec struct {
 	ReleasedAt               *metav1.Time            `json:"releasedAt,omitempty"`
 	ReplicatedRegistryDomain string                  `json:"replicatedRegistryDomain,omitempty"`
 	ReplicatedProxyDomain    string                  `json:"replicatedProxyDomain,omitempty"`
+	ReplicatedChartNames     []string                `json:"replicatedChartNames,omitempty"`
 	EncryptionKey            string                  `json:"encryptionKey,omitempty"`
 	KnownImages              []InstallationImage     `json:"knownImages,omitempty"`
 	YAMLErrors               []InstallationYAMLError `json:"yamlErrors,omitempty"`

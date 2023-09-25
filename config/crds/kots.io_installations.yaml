@@ -58,6 +58,10 @@ spec:
               releasedAt:
                 format: date-time
                 type: string
+              replicatedChartNames:
+                items:
+                  type: string
+                type: array
               replicatedProxyDomain:
                 type: string
               replicatedRegistryDomain:
