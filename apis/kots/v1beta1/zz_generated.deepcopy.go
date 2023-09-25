@@ -1408,6 +1408,11 @@ func (in *InstallationSpec) DeepCopyInto(out *InstallationSpec) {
 		in, out := &in.ReleasedAt, &out.ReleasedAt
 		*out = (*in).DeepCopy()
 	}
+	if in.ReplicatedChartNames != nil {
+		in, out := &in.ReplicatedChartNames, &out.ReplicatedChartNames
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.KnownImages != nil {
 		in, out := &in.KnownImages, &out.KnownImages
 		*out = make([]InstallationImage, len(*in))

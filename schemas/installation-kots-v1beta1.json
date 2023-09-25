@@ -50,6 +50,12 @@
           "type": "string",
           "format": "date-time"
         },
+        "replicatedChartNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "replicatedProxyDomain": {
           "type": "string"
         },
