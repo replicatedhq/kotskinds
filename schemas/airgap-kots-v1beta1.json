@@ -35,6 +35,12 @@
         "releaseNotes": {
           "type": "string"
         },
+        "replicatedChartNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "requiredReleases": {
           "type": "array",
           "items": {

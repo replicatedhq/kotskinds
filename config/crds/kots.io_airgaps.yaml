@@ -48,6 +48,10 @@ spec:
                 type: boolean
               releaseNotes:
                 type: string
+              replicatedChartNames:
+                items:
+                  type: string
+                type: array
               requiredReleases:
                 items:
                   description: AirgapStatus defines airgap release metadata
