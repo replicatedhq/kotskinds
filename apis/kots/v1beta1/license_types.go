@@ -90,12 +90,18 @@ func (entitlementValue *EntitlementValue) UnmarshalJSON(value []byte) error {
 	return errors.New("unknown license value type")
 }
 
+type EntitlementSignature struct {
+	V1 string `json:"v1,omitempty"`
+}
+
 type EntitlementField struct {
-	Title       string           `json:"title,omitempty"`
-	Description string           `json:"description,omitempty"`
-	Value       EntitlementValue `json:"value,omitempty"`
-	ValueType   string           `json:"valueType,omitempty"`
-	IsHidden    bool             `json:"isHidden,omitempty"`
+	Name        string               `json:"name,omitempty"`
+	Title       string               `json:"title,omitempty"`
+	Description string               `json:"description,omitempty"`
+	Value       EntitlementValue     `json:"value,omitempty"`
+	ValueType   string               `json:"valueType,omitempty"`
+	IsHidden    bool                 `json:"isHidden,omitempty"`
+	Signature   EntitlementSignature `json:"signature,omitempty"`
 }
 
 // LicenseSpec defines the desired state of LicenseSpec

@@ -55,6 +55,13 @@ spec:
                       type: string
                     isHidden:
                       type: boolean
+                    name:
+                      type: string
+                    signature:
+                      properties:
+                        v1:
+                          type: string
+                      type: object
                     title:
                       type: string
                     value:

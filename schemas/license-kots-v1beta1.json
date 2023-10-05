@@ -51,6 +51,17 @@
               "isHidden": {
                 "type": "boolean"
               },
+              "name": {
+                "type": "string"
+              },
+              "signature": {
+                "type": "object",
+                "properties": {
+                  "v1": {
+                    "type": "string"
+                  }
+                }
+              },
               "title": {
                 "type": "string"
               },
