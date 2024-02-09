@@ -54,8 +54,6 @@ type ApplicationSpec struct {
 	Graphs                       []MetricGraph       `json:"graphs,omitempty"`
 	MinKotsVersion               string              `json:"minKotsVersion,omitempty"`
 	TargetKotsVersion            string              `json:"targetKotsVersion,omitempty"`
-	KubectlVersion               string              `json:"kubectlVersion,omitempty"`
-	KustomizeVersion             string              `json:"kustomizeVersion,omitempty"`
 	AdditionalImages             []string            `json:"additionalImages,omitempty"`
 	AdditionalNamespaces         []string            `json:"additionalNamespaces,omitempty"`
 	RequireMinimalRBACPrivileges bool                `json:"requireMinimalRBACPrivileges,omitempty"`

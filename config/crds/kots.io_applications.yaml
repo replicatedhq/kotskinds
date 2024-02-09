@@ -101,10 +101,6 @@ spec:
                 type: array
               icon:
                 type: string
-              kubectlVersion:
-                type: string
-              kustomizeVersion:
-                type: string
               minKotsVersion:
                 type: string
               ports:
