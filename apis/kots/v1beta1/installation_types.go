@@ -34,6 +34,7 @@ type InstallationSpec struct {
 	ReplicatedChartNames     []string                `json:"replicatedChartNames,omitempty"`
 	EncryptionKey            string                  `json:"encryptionKey,omitempty"`
 	KnownImages              []InstallationImage     `json:"knownImages,omitempty"`
+	AirgapArtifacts          []string                `json:"airgapArtifacts,omitempty"`
 	YAMLErrors               []InstallationYAMLError `json:"yamlErrors,omitempty"`
 }
 
