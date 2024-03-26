@@ -36,14 +36,14 @@ spec:
           spec:
             description: InstallationSpec defines the desired state of InstallationSpec
             properties:
-              airgapArtifacts:
-                items:
-                  type: string
-                type: array
               channelID:
                 type: string
               channelName:
                 type: string
+              embeddedClusterArtifacts:
+                items:
+                  type: string
+                type: array
               encryptionKey:
                 type: string
               isRequired:

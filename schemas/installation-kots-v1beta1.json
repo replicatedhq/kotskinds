@@ -17,17 +17,17 @@
       "description": "InstallationSpec defines the desired state of InstallationSpec",
       "type": "object",
       "properties": {
-        "airgapArtifacts": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "channelID": {
           "type": "string"
         },
         "channelName": {
           "type": "string"
+        },
+        "embeddedClusterArtifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "encryptionKey": {
           "type": "string"

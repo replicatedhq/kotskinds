@@ -1423,8 +1423,8 @@ func (in *InstallationSpec) DeepCopyInto(out *InstallationSpec) {
 		*out = make([]InstallationImage, len(*in))
 		copy(*out, *in)
 	}
-	if in.AirgapArtifacts != nil {
-		in, out := &in.AirgapArtifacts, &out.AirgapArtifacts
+	if in.EmbeddedClusterArtifacts != nil {
+		in, out := &in.EmbeddedClusterArtifacts, &out.EmbeddedClusterArtifacts
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
