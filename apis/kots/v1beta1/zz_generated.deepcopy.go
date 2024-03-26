@@ -1423,6 +1423,11 @@ func (in *InstallationSpec) DeepCopyInto(out *InstallationSpec) {
 		*out = make([]InstallationImage, len(*in))
 		copy(*out, *in)
 	}
+	if in.EmbeddedClusterArtifacts != nil {
+		in, out := &in.EmbeddedClusterArtifacts, &out.EmbeddedClusterArtifacts
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.YAMLErrors != nil {
 		in, out := &in.YAMLErrors, &out.YAMLErrors
 		*out = make([]InstallationYAMLError, len(*in))

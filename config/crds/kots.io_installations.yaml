@@ -40,6 +40,10 @@ spec:
                 type: string
               channelName:
                 type: string
+              embeddedClusterArtifacts:
+                items:
+                  type: string
+                type: array
               encryptionKey:
                 type: string
               isRequired:

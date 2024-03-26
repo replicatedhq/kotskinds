@@ -23,6 +23,12 @@
         "channelName": {
           "type": "string"
         },
+        "embeddedClusterArtifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "encryptionKey": {
           "type": "string"
         },
