@@ -20,6 +20,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type AirgapArtifactType string
+
+const (
+	ArtifactTypeEmbeddedClusterCharts   AirgapArtifactType = "embedded-cluster-charts"
+	ArtifactTypeEmbeddedClusterImages   AirgapArtifactType = "embedded-cluster-images"
+	ArtifactTypeEmbeddedClusterBinary   AirgapArtifactType = "embedded-cluster-binary"
+	ArtifactTypeEmbeddedClusterMetadata AirgapArtifactType = "embedded-cluster-metadata"
+)
+
 // AirgapSpec defines the desired state of AirgapSpec
 type AirgapSpec struct {
 	AirgapReleaseMeta    `json:",inline"`
@@ -30,6 +39,7 @@ type AirgapSpec struct {
 	IsRequired           bool                `json:"isRequired,omitempty"`
 	RequiredReleases     []AirgapReleaseMeta `json:"requiredReleases,omitempty"`
 	SavedImages          []string            `json:"savedImages,omitempty"`
+	SavedArtifacts       []SavedArtifact     `json:"savedArtifacts,omitempty"`
 	Format               string              `json:"format,omitempty"`
 	ReplicatedChartNames []string            `json:"replicatedChartNames,omitempty"`
 }
@@ -39,6 +49,14 @@ type AirgapReleaseMeta struct {
 	VersionLabel string `json:"versionLabel,omitempty"`
 	ReleaseNotes string `json:"releaseNotes,omitempty"`
 	UpdateCursor string `json:"updateCursor,omitempty"`
+}
+
+// SavedArtifact defines an OCI artifact saved to the airgap bundle
+type SavedArtifact struct {
+	// Path is the path to the artifact in the airgap bundle
+	Path string `json:"path"`
+	// Type is the type of artifact
+	Type AirgapArtifactType `json:"type"`
 }
 
 // AirgapStatus defines the observed state of Airgap
