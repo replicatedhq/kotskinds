@@ -20,28 +20,28 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type AirgapArtifactType string
+type EmbeddedClusterArtifactType string
 
 const (
-	ArtifactTypeEmbeddedClusterCharts   AirgapArtifactType = "embedded-cluster-charts"
-	ArtifactTypeEmbeddedClusterImages   AirgapArtifactType = "embedded-cluster-images"
-	ArtifactTypeEmbeddedClusterBinary   AirgapArtifactType = "embedded-cluster-binary"
-	ArtifactTypeEmbeddedClusterMetadata AirgapArtifactType = "embedded-cluster-metadata"
+	EmbeddedClusterArtifactTypeCharts   EmbeddedClusterArtifactType = "charts"
+	EmbeddedClusterArtifactTypeImages   EmbeddedClusterArtifactType = "images"
+	EmbeddedClusterArtifactTypeBinary   EmbeddedClusterArtifactType = "binary"
+	EmbeddedClusterArtifactTypeMetadata EmbeddedClusterArtifactType = "metadata"
 )
 
 // AirgapSpec defines the desired state of AirgapSpec
 type AirgapSpec struct {
-	AirgapReleaseMeta    `json:",inline"`
-	ChannelID            string              `json:"channelID,omitempty"`
-	ChannelName          string              `json:"channelName,omitempty"`
-	Signature            []byte              `json:"signature,omitempty"`
-	AppSlug              string              `json:"appSlug,omitempty"`
-	IsRequired           bool                `json:"isRequired,omitempty"`
-	RequiredReleases     []AirgapReleaseMeta `json:"requiredReleases,omitempty"`
-	SavedImages          []string            `json:"savedImages,omitempty"`
-	SavedArtifacts       []SavedArtifact     `json:"savedArtifacts,omitempty"`
-	Format               string              `json:"format,omitempty"`
-	ReplicatedChartNames []string            `json:"replicatedChartNames,omitempty"`
+	AirgapReleaseMeta        `json:",inline"`
+	ChannelID                string                    `json:"channelID,omitempty"`
+	ChannelName              string                    `json:"channelName,omitempty"`
+	Signature                []byte                    `json:"signature,omitempty"`
+	AppSlug                  string                    `json:"appSlug,omitempty"`
+	IsRequired               bool                      `json:"isRequired,omitempty"`
+	RequiredReleases         []AirgapReleaseMeta       `json:"requiredReleases,omitempty"`
+	SavedImages              []string                  `json:"savedImages,omitempty"`
+	EmbeddedClusterArtifacts []EmbeddedClusterArtifact `json:"embeddedClusterArtifacts,omitempty"`
+	Format                   string                    `json:"format,omitempty"`
+	ReplicatedChartNames     []string                  `json:"replicatedChartNames,omitempty"`
 }
 
 // AirgapStatus defines airgap release metadata
@@ -51,12 +51,12 @@ type AirgapReleaseMeta struct {
 	UpdateCursor string `json:"updateCursor,omitempty"`
 }
 
-// SavedArtifact defines an OCI artifact saved to the airgap bundle
-type SavedArtifact struct {
+// EmbeddedClusterArtifact defines an OCI artifact saved to the airgap bundle
+type EmbeddedClusterArtifact struct {
 	// Path is the path to the artifact in the airgap bundle
 	Path string `json:"path"`
 	// Type is the type of artifact
-	Type AirgapArtifactType `json:"type"`
+	Type EmbeddedClusterArtifactType `json:"type"`
 }
 
 // AirgapStatus defines the observed state of Airgap

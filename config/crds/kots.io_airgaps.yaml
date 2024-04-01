@@ -42,6 +42,23 @@ spec:
                 type: string
               channelName:
                 type: string
+              embeddedClusterArtifacts:
+                items:
+                  description: EmbeddedClusterArtifact defines an OCI artifact saved
+                    to the airgap bundle
+                  properties:
+                    path:
+                      description: Path is the path to the artifact in the airgap
+                        bundle
+                      type: string
+                    type:
+                      description: Type is the type of artifact
+                      type: string
+                  required:
+                  - path
+                  - type
+                  type: object
+                type: array
               format:
                 type: string
               isRequired:
@@ -62,23 +79,6 @@ spec:
                       type: string
                     versionLabel:
                       type: string
-                  type: object
-                type: array
-              savedArtifacts:
-                items:
-                  description: SavedArtifact defines an OCI artifact saved to the
-                    airgap bundle
-                  properties:
-                    path:
-                      description: Path is the path to the artifact in the airgap
-                        bundle
-                      type: string
-                    type:
-                      description: Type is the type of artifact
-                      type: string
-                  required:
-                  - path
-                  - type
                   type: object
                 type: array
               savedImages:
