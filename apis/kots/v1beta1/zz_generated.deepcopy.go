@@ -119,7 +119,11 @@ func (in *AirgapSpec) DeepCopyInto(out *AirgapSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	out.EmbeddedClusterArtifacts = in.EmbeddedClusterArtifacts
+	if in.EmbeddedClusterArtifacts != nil {
+		in, out := &in.EmbeddedClusterArtifacts, &out.EmbeddedClusterArtifacts
+		*out = new(EmbeddedClusterArtifacts)
+		**out = **in
+	}
 	if in.ReplicatedChartNames != nil {
 		in, out := &in.ReplicatedChartNames, &out.ReplicatedChartNames
 		*out = make([]string, len(*in))
