@@ -22,16 +22,17 @@ import (
 
 // AirgapSpec defines the desired state of AirgapSpec
 type AirgapSpec struct {
-	AirgapReleaseMeta    `json:",inline"`
-	ChannelID            string              `json:"channelID,omitempty"`
-	ChannelName          string              `json:"channelName,omitempty"`
-	Signature            []byte              `json:"signature,omitempty"`
-	AppSlug              string              `json:"appSlug,omitempty"`
-	IsRequired           bool                `json:"isRequired,omitempty"`
-	RequiredReleases     []AirgapReleaseMeta `json:"requiredReleases,omitempty"`
-	SavedImages          []string            `json:"savedImages,omitempty"`
-	Format               string              `json:"format,omitempty"`
-	ReplicatedChartNames []string            `json:"replicatedChartNames,omitempty"`
+	AirgapReleaseMeta        `json:",inline"`
+	ChannelID                string                    `json:"channelID,omitempty"`
+	ChannelName              string                    `json:"channelName,omitempty"`
+	Signature                []byte                    `json:"signature,omitempty"`
+	AppSlug                  string                    `json:"appSlug,omitempty"`
+	IsRequired               bool                      `json:"isRequired,omitempty"`
+	RequiredReleases         []AirgapReleaseMeta       `json:"requiredReleases,omitempty"`
+	SavedImages              []string                  `json:"savedImages,omitempty"`
+	EmbeddedClusterArtifacts *EmbeddedClusterArtifacts `json:"embeddedClusterArtifacts,omitempty"`
+	Format                   string                    `json:"format,omitempty"`
+	ReplicatedChartNames     []string                  `json:"replicatedChartNames,omitempty"`
 }
 
 // AirgapStatus defines airgap release metadata
@@ -39,6 +40,14 @@ type AirgapReleaseMeta struct {
 	VersionLabel string `json:"versionLabel,omitempty"`
 	ReleaseNotes string `json:"releaseNotes,omitempty"`
 	UpdateCursor string `json:"updateCursor,omitempty"`
+}
+
+// EmbeddedClusterArtifacts maps embedded cluster artifacts to their path in the airgap bundle
+type EmbeddedClusterArtifacts struct {
+	Charts   string `json:"charts,omitempty"`
+	Images   string `json:"images,omitempty"`
+	Binary   string `json:"binary,omitempty"`
+	Metadata string `json:"metadata,omitempty"`
 }
 
 // AirgapStatus defines the observed state of Airgap

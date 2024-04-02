@@ -26,6 +26,24 @@
         "channelName": {
           "type": "string"
         },
+        "embeddedClusterArtifacts": {
+          "description": "EmbeddedClusterArtifacts maps embedded cluster artifacts to their path in the airgap bundle",
+          "type": "object",
+          "properties": {
+            "binary": {
+              "type": "string"
+            },
+            "charts": {
+              "type": "string"
+            },
+            "images": {
+              "type": "string"
+            },
+            "metadata": {
+              "type": "string"
+            }
+          }
+        },
         "format": {
           "type": "string"
         },
