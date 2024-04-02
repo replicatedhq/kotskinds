@@ -27,23 +27,20 @@
           "type": "string"
         },
         "embeddedClusterArtifacts": {
-          "type": "array",
-          "items": {
-            "description": "EmbeddedClusterArtifact defines an OCI artifact saved to the airgap bundle",
-            "type": "object",
-            "required": [
-              "path",
-              "type"
-            ],
-            "properties": {
-              "path": {
-                "description": "Path is the path to the artifact in the airgap bundle",
-                "type": "string"
-              },
-              "type": {
-                "description": "Type is the type of artifact",
-                "type": "string"
-              }
+          "description": "EmbeddedClusterArtifacts maps embedded cluster artifacts to their path in the airgap bundle",
+          "type": "object",
+          "properties": {
+            "binary": {
+              "type": "string"
+            },
+            "charts": {
+              "type": "string"
+            },
+            "images": {
+              "type": "string"
+            },
+            "metadata": {
+              "type": "string"
             }
           }
         },
