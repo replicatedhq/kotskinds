@@ -1445,8 +1445,8 @@ func (in *InstallationSpec) DeepCopyInto(out *InstallationSpec) {
 	}
 	if in.EmbeddedClusterArtifacts != nil {
 		in, out := &in.EmbeddedClusterArtifacts, &out.EmbeddedClusterArtifacts
-		*out = make([]string, len(*in))
-		copy(*out, *in)
+		*out = new(EmbeddedClusterArtifacts)
+		**out = **in
 	}
 	if in.YAMLErrors != nil {
 		in, out := &in.YAMLErrors, &out.YAMLErrors

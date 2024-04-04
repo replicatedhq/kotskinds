@@ -41,9 +41,18 @@ spec:
               channelName:
                 type: string
               embeddedClusterArtifacts:
-                items:
-                  type: string
-                type: array
+                description: EmbeddedClusterArtifacts maps embedded cluster artifacts
+                  to their path
+                properties:
+                  binary:
+                    type: string
+                  charts:
+                    type: string
+                  images:
+                    type: string
+                  metadata:
+                    type: string
+                type: object
               encryptionKey:
                 type: string
               isRequired:
