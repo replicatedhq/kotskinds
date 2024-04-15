@@ -46,11 +46,11 @@ spec:
                 description: EmbeddedClusterArtifacts maps embedded cluster artifacts
                   to their path in the airgap bundle
                 properties:
-                  binary:
+                  binaryAmd64:
                     type: string
                   charts:
                     type: string
-                  images:
+                  imagesAmd64:
                     type: string
                   metadata:
                     type: string
