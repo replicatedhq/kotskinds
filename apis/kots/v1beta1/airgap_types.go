@@ -44,10 +44,10 @@ type AirgapReleaseMeta struct {
 
 // EmbeddedClusterArtifacts maps embedded cluster artifacts to their path in the airgap bundle
 type EmbeddedClusterArtifacts struct {
-	Charts   string `json:"charts,omitempty"`
-	Images   string `json:"images,omitempty"`
-	Binary   string `json:"binary,omitempty"`
-	Metadata string `json:"metadata,omitempty"`
+	Charts      string `json:"charts,omitempty"`
+	ImagesAmd64 string `json:"imagesAmd64,omitempty"`
+	BinaryAmd64 string `json:"binaryAmd64,omitempty"`
+	Metadata    string `json:"metadata,omitempty"`
 }
 
 // AirgapStatus defines the observed state of Airgap
