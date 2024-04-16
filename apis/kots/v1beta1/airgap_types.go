@@ -42,7 +42,7 @@ type AirgapReleaseMeta struct {
 	UpdateCursor string `json:"updateCursor,omitempty"`
 }
 
-// EmbeddedClusterArtifacts maps embedded cluster artifacts to their path in the airgap bundle
+// EmbeddedClusterArtifacts maps embedded cluster artifacts to their path
 type EmbeddedClusterArtifacts struct {
 	Charts      string `json:"charts,omitempty"`
 	ImagesAmd64 string `json:"imagesAmd64,omitempty"`
