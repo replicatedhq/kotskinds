@@ -23,7 +23,6 @@ import (
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeConfigValueses struct {
 	ns   string
 }
 
-var configvaluesesResource = schema.GroupVersionResource{Group: "kots.io", Version: "v1beta1", Resource: "configvalueses"}
+var configvaluesesResource = v1beta1.SchemeGroupVersion.WithResource("configvalueses")
 
-var configvaluesesKind = schema.GroupVersionKind{Group: "kots.io", Version: "v1beta1", Kind: "ConfigValues"}
+var configvaluesesKind = v1beta1.SchemeGroupVersion.WithKind("ConfigValues")
 
 // Get takes name of the configValues, and returns the corresponding configValues object, and an error if there is any.
 func (c *FakeConfigValueses) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.ConfigValues, err error) {
@@ -116,7 +115,7 @@ func (c *FakeConfigValueses) UpdateStatus(ctx context.Context, configValues *v1b
 // Delete takes name of the configValues and deletes it. Returns an error if one occurs.
 func (c *FakeConfigValueses) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(configvaluesesResource, c.ns, name), &v1beta1.ConfigValues{})
+		Invokes(testing.NewDeleteActionWithOptions(configvaluesesResource, c.ns, name, opts), &v1beta1.ConfigValues{})
 
 	return err
 }
