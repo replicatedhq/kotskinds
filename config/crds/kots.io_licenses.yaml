@@ -39,8 +39,6 @@ spec:
           spec:
             description: LicenseSpec defines the desired state of LicenseSpec
             properties:
-              IsDisasterRecoverySupported:
-                type: boolean
               appSlug:
                 type: string
               channelID:
@@ -69,6 +67,8 @@ spec:
                   type: object
                 type: object
               isAirgapSupported:
+                type: boolean
+              isDisasterRecoverySupported:
                 type: boolean
               isGeoaxisSupported:
                 type: boolean
