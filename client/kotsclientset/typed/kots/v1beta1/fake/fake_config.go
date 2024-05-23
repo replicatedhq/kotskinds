@@ -23,7 +23,6 @@ import (
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeConfigs struct {
 	ns   string
 }
 
-var configsResource = schema.GroupVersionResource{Group: "kots.io", Version: "v1beta1", Resource: "configs"}
+var configsResource = v1beta1.SchemeGroupVersion.WithResource("configs")
 
-var configsKind = schema.GroupVersionKind{Group: "kots.io", Version: "v1beta1", Kind: "Config"}
+var configsKind = v1beta1.SchemeGroupVersion.WithKind("Config")
 
 // Get takes name of the config, and returns the corresponding config object, and an error if there is any.
 func (c *FakeConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Config, err error) {
@@ -116,7 +115,7 @@ func (c *FakeConfigs) UpdateStatus(ctx context.Context, config *v1beta1.Config, 
 // Delete takes name of the config and deletes it. Returns an error if one occurs.
 func (c *FakeConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(configsResource, c.ns, name), &v1beta1.Config{})
+		Invokes(testing.NewDeleteActionWithOptions(configsResource, c.ns, name, opts), &v1beta1.Config{})
 
 	return err
 }

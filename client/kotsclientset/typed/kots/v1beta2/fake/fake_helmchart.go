@@ -23,7 +23,6 @@ import (
 	v1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeHelmCharts struct {
 	ns   string
 }
 
-var helmchartsResource = schema.GroupVersionResource{Group: "kots.io", Version: "v1beta2", Resource: "helmcharts"}
+var helmchartsResource = v1beta2.SchemeGroupVersion.WithResource("helmcharts")
 
-var helmchartsKind = schema.GroupVersionKind{Group: "kots.io", Version: "v1beta2", Kind: "HelmChart"}
+var helmchartsKind = v1beta2.SchemeGroupVersion.WithKind("HelmChart")
 
 // Get takes name of the helmChart, and returns the corresponding helmChart object, and an error if there is any.
 func (c *FakeHelmCharts) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.HelmChart, err error) {
@@ -116,7 +115,7 @@ func (c *FakeHelmCharts) UpdateStatus(ctx context.Context, helmChart *v1beta2.He
 // Delete takes name of the helmChart and deletes it. Returns an error if one occurs.
 func (c *FakeHelmCharts) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(helmchartsResource, c.ns, name), &v1beta2.HelmChart{})
+		Invokes(testing.NewDeleteActionWithOptions(helmchartsResource, c.ns, name, opts), &v1beta2.HelmChart{})
 
 	return err
 }

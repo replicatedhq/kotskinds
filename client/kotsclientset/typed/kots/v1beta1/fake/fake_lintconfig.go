@@ -23,7 +23,6 @@ import (
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeLintConfigs struct {
 	ns   string
 }
 
-var lintconfigsResource = schema.GroupVersionResource{Group: "kots.io", Version: "v1beta1", Resource: "lintconfigs"}
+var lintconfigsResource = v1beta1.SchemeGroupVersion.WithResource("lintconfigs")
 
-var lintconfigsKind = schema.GroupVersionKind{Group: "kots.io", Version: "v1beta1", Kind: "LintConfig"}
+var lintconfigsKind = v1beta1.SchemeGroupVersion.WithKind("LintConfig")
 
 // Get takes name of the lintConfig, and returns the corresponding lintConfig object, and an error if there is any.
 func (c *FakeLintConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.LintConfig, err error) {
@@ -116,7 +115,7 @@ func (c *FakeLintConfigs) UpdateStatus(ctx context.Context, lintConfig *v1beta1.
 // Delete takes name of the lintConfig and deletes it. Returns an error if one occurs.
 func (c *FakeLintConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(lintconfigsResource, c.ns, name), &v1beta1.LintConfig{})
+		Invokes(testing.NewDeleteActionWithOptions(lintconfigsResource, c.ns, name, opts), &v1beta1.LintConfig{})
 
 	return err
 }

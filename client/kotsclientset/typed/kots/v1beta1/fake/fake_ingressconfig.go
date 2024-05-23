@@ -23,7 +23,6 @@ import (
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeIngressConfigs struct {
 	ns   string
 }
 
-var ingressconfigsResource = schema.GroupVersionResource{Group: "kots.io", Version: "v1beta1", Resource: "ingressconfigs"}
+var ingressconfigsResource = v1beta1.SchemeGroupVersion.WithResource("ingressconfigs")
 
-var ingressconfigsKind = schema.GroupVersionKind{Group: "kots.io", Version: "v1beta1", Kind: "IngressConfig"}
+var ingressconfigsKind = v1beta1.SchemeGroupVersion.WithKind("IngressConfig")
 
 // Get takes name of the ingressConfig, and returns the corresponding ingressConfig object, and an error if there is any.
 func (c *FakeIngressConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.IngressConfig, err error) {
@@ -116,7 +115,7 @@ func (c *FakeIngressConfigs) UpdateStatus(ctx context.Context, ingressConfig *v1
 // Delete takes name of the ingressConfig and deletes it. Returns an error if one occurs.
 func (c *FakeIngressConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(ingressconfigsResource, c.ns, name), &v1beta1.IngressConfig{})
+		Invokes(testing.NewDeleteActionWithOptions(ingressconfigsResource, c.ns, name, opts), &v1beta1.IngressConfig{})
 
 	return err
 }
