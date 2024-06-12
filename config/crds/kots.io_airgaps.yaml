@@ -59,9 +59,9 @@ spec:
                     type: string
                   registry:
                     description: |-
-                      Registry holds a directory from where a images can be read and later pushed
-                      to the registry. Format inside the directory is the same as the registry
-                      storage format.
+                      EmbeddedClusterRegistry holds a directory from where a images can be read and later
+                      pushed to the embedded cluster registry. Format inside the directory is the same as
+                      the registry storage format.
                     properties:
                       dir:
                         type: string
