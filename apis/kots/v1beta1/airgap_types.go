@@ -44,11 +44,12 @@ type AirgapReleaseMeta struct {
 
 // EmbeddedClusterArtifacts maps embedded cluster artifacts to their path
 type EmbeddedClusterArtifacts struct {
-	Charts      string                  `json:"charts,omitempty"`
-	ImagesAmd64 string                  `json:"imagesAmd64,omitempty"`
-	BinaryAmd64 string                  `json:"binaryAmd64,omitempty"`
-	Metadata    string                  `json:"metadata,omitempty"`
-	Registry    EmbeddedClusterRegistry `json:"registry,omitempty"`
+	Charts              string                  `json:"charts,omitempty"`
+	ImagesAmd64         string                  `json:"imagesAmd64,omitempty"`
+	BinaryAmd64         string                  `json:"binaryAmd64,omitempty"`
+	Metadata            string                  `json:"metadata,omitempty"`
+	Registry            EmbeddedClusterRegistry `json:"registry,omitempty"`
+	AdditionalArtifacts map[string]string       `json:"additionalArtifacts,omitempty"`
 }
 
 // EmbeddedClusterRegistry holds a directory from where a images can be read and later
