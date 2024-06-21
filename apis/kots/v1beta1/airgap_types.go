@@ -52,6 +52,31 @@ type EmbeddedClusterArtifacts struct {
 	AdditionalArtifacts map[string]string       `json:"additionalArtifacts,omitempty"`
 }
 
+// Total returns the total amount of embedded cluster artifacts contained in
+// the airgap bundle. Sums up the amount of charts, images, binaries, metadata
+// and additional artifacts.
+func (e *EmbeddedClusterArtifacts) Total() int {
+	total := 0
+	if e == nil {
+		return total
+	}
+	if e.Charts != "" {
+		total++
+	}
+	if e.ImagesAmd64 != "" {
+		total++
+	}
+	if e.BinaryAmd64 != "" {
+		total++
+	}
+	if e.Metadata != "" {
+		total++
+	}
+	total += len(e.AdditionalArtifacts)
+	total += len(e.Registry.SavedImages)
+	return total
+}
+
 // EmbeddedClusterRegistry holds a directory from where a images can be read and later
 // pushed to the embedded cluster registry. Format inside the directory is the same as
 // the registry storage format.
