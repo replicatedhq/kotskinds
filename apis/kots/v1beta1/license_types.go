@@ -99,10 +99,11 @@ type EntitlementField struct {
 }
 
 type Channel struct {
-	ID        string `json:"id"`
-	Name      string `json:"name,omitempty"`
-	Slug      string `json:"slug,omitempty"`
-	IsDefault bool   `json:"isDefault,omitempty"`
+	ID               string `json:"id"`
+	Name             string `json:"name,omitempty"`
+	Slug             string `json:"slug,omitempty"`
+	IsDefault        bool   `json:"isDefault,omitempty"`
+	IsSemverRequired bool   `json:"isSemverRequired,omitempty"`
 }
 
 // LicenseSpec defines the desired state of LicenseSpec
