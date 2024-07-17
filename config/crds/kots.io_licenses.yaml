@@ -45,6 +45,23 @@ spec:
                 type: string
               channelName:
                 type: string
+              channels:
+                items:
+                  properties:
+                    id:
+                      type: string
+                    isDefault:
+                      type: boolean
+                    isSemverRequired:
+                      type: boolean
+                    name:
+                      type: string
+                    slug:
+                      type: string
+                  required:
+                  - id
+                  type: object
+                type: array
               customerEmail:
                 type: string
               customerName:
@@ -69,6 +86,8 @@ spec:
               isAirgapSupported:
                 type: boolean
               isDisasterRecoverySupported:
+                type: boolean
+              isEmbeddedClusterDownloadEnabled:
                 type: boolean
               isGeoaxisSupported:
                 type: boolean

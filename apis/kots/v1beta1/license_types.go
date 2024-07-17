@@ -98,6 +98,14 @@ type EntitlementField struct {
 	IsHidden    bool             `json:"isHidden,omitempty"`
 }
 
+type Channel struct {
+	ID               string `json:"id"`
+	Name             string `json:"name,omitempty"`
+	Slug             string `json:"slug,omitempty"`
+	IsDefault        bool   `json:"isDefault,omitempty"`
+	IsSemverRequired bool   `json:"isSemverRequired,omitempty"`
+}
+
 // LicenseSpec defines the desired state of LicenseSpec
 type LicenseSpec struct {
 	Signature                        []byte                      `json:"signature"`
@@ -107,6 +115,7 @@ type LicenseSpec struct {
 	CustomerEmail                    string                      `json:"customerEmail,omitempty"`
 	ChannelID                        string                      `json:"channelID,omitempty"`
 	ChannelName                      string                      `json:"channelName,omitempty"`
+	Channels                         []Channel                   `json:"channels,omitempty"`
 	LicenseSequence                  int64                       `json:"licenseSequence,omitempty"`
 	LicenseID                        string                      `json:"licenseID"`
 	LicenseType                      string                      `json:"licenseType,omitempty"`
