@@ -99,9 +99,9 @@ type EntitlementField struct {
 }
 
 type Channel struct {
-	ID               string `json:"id"`
-	Name             string `json:"name,omitempty"`
-	Slug             string `json:"slug,omitempty"`
+	ChannelID        string `json:"channelID"`
+	ChannelName      string `json:"channelName,omitempty"`
+	ChannelSlug      string `json:"channelSlug,omitempty"`
 	IsDefault        bool   `json:"isDefault,omitempty"`
 	IsSemverRequired bool   `json:"isSemverRequired,omitempty"`
 }

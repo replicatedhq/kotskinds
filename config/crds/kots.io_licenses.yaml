@@ -48,18 +48,18 @@ spec:
               channels:
                 items:
                   properties:
-                    id:
+                    channelID:
+                      type: string
+                    channelName:
+                      type: string
+                    channelSlug:
                       type: string
                     isDefault:
                       type: boolean
                     isSemverRequired:
                       type: boolean
-                    name:
-                      type: string
-                    slug:
-                      type: string
                   required:
-                  - id
+                  - channelID
                   type: object
                 type: array
               customerEmail:
