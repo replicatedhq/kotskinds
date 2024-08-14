@@ -54,10 +54,14 @@ spec:
                       type: string
                     channelSlug:
                       type: string
+                    endpoint:
+                      type: string
                     isDefault:
                       type: boolean
                     isSemverRequired:
                       type: boolean
+                    replicatedProxyDomain:
+                      type: string
                   required:
                   - channelID
                   type: object
@@ -107,6 +111,8 @@ spec:
                 format: int64
                 type: integer
               licenseType:
+                type: string
+              replicatedProxyDomain:
                 type: string
               signature:
                 format: byte
