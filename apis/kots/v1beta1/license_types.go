@@ -99,11 +99,13 @@ type EntitlementField struct {
 }
 
 type Channel struct {
-	ChannelID        string `json:"channelID"`
-	ChannelName      string `json:"channelName,omitempty"`
-	ChannelSlug      string `json:"channelSlug,omitempty"`
-	IsDefault        bool   `json:"isDefault,omitempty"`
-	IsSemverRequired bool   `json:"isSemverRequired,omitempty"`
+	ChannelID             string `json:"channelID"`
+	ChannelName           string `json:"channelName,omitempty"`
+	ChannelSlug           string `json:"channelSlug,omitempty"`
+	IsDefault             bool   `json:"isDefault,omitempty"`
+	Endpoint              string `json:"endpoint,omitempty"`
+	ReplicatedProxyDomain string `json:"replicatedProxyDomain,omitempty"`
+	IsSemverRequired      bool   `json:"isSemverRequired,omitempty"`
 }
 
 // LicenseSpec defines the desired state of LicenseSpec
@@ -111,6 +113,7 @@ type LicenseSpec struct {
 	Signature                        []byte                      `json:"signature"`
 	AppSlug                          string                      `json:"appSlug"`
 	Endpoint                         string                      `json:"endpoint,omitempty"`
+	ReplicatedProxyDomain            string                      `json:"replicatedProxyDomain,omitempty"`
 	CustomerName                     string                      `json:"customerName,omitempty"`
 	CustomerEmail                    string                      `json:"customerEmail,omitempty"`
 	ChannelID                        string                      `json:"channelID,omitempty"`
