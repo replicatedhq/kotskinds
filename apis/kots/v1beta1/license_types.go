@@ -110,29 +110,29 @@ type Channel struct {
 
 // LicenseSpec defines the desired state of LicenseSpec
 type LicenseSpec struct {
-	Signature                          []byte                      `json:"signature"`
-	AppSlug                            string                      `json:"appSlug"`
-	Endpoint                           string                      `json:"endpoint,omitempty"`
-	ReplicatedProxyDomain              string                      `json:"replicatedProxyDomain,omitempty"`
-	CustomerName                       string                      `json:"customerName,omitempty"`
-	CustomerEmail                      string                      `json:"customerEmail,omitempty"`
-	ChannelID                          string                      `json:"channelID,omitempty"`
-	ChannelName                        string                      `json:"channelName,omitempty"`
-	Channels                           []Channel                   `json:"channels,omitempty"`
-	LicenseSequence                    int64                       `json:"licenseSequence,omitempty"`
-	LicenseID                          string                      `json:"licenseID"`
-	LicenseType                        string                      `json:"licenseType,omitempty"`
-	IsAirgapSupported                  bool                        `json:"isAirgapSupported,omitempty"`
-	IsGitOpsSupported                  bool                        `json:"isGitOpsSupported,omitempty"`
-	IsIdentityServiceSupported         bool                        `json:"isIdentityServiceSupported,omitempty"`
-	IsGeoaxisSupported                 bool                        `json:"isGeoaxisSupported,omitempty"`
-	IsSnapshotSupported                bool                        `json:"isSnapshotSupported,omitempty"`
-	IsDisasterRecoverySupported        bool                        `json:"isDisasterRecoverySupported,omitempty"`
-	IsSupportBundleUploadSupported     bool                        `json:"isSupportBundleUploadSupported,omitempty"`
-	IsSemverRequired                   bool                        `json:"isSemverRequired,omitempty"`
-	IsEmbeddedClusterDownloadEnabled   bool                        `json:"isEmbeddedClusterDownloadEnabled,omitempty"`
-	IsEmbeddedClusterMultinodeDisabled bool                        `json:"isEmbeddedClusterMultinodeDisabled,omitempty"`
-	Entitlements                       map[string]EntitlementField `json:"entitlements,omitempty"`
+	Signature                         []byte                      `json:"signature"`
+	AppSlug                           string                      `json:"appSlug"`
+	Endpoint                          string                      `json:"endpoint,omitempty"`
+	ReplicatedProxyDomain             string                      `json:"replicatedProxyDomain,omitempty"`
+	CustomerName                      string                      `json:"customerName,omitempty"`
+	CustomerEmail                     string                      `json:"customerEmail,omitempty"`
+	ChannelID                         string                      `json:"channelID,omitempty"`
+	ChannelName                       string                      `json:"channelName,omitempty"`
+	Channels                          []Channel                   `json:"channels,omitempty"`
+	LicenseSequence                   int64                       `json:"licenseSequence,omitempty"`
+	LicenseID                         string                      `json:"licenseID"`
+	LicenseType                       string                      `json:"licenseType,omitempty"`
+	IsAirgapSupported                 bool                        `json:"isAirgapSupported,omitempty"`
+	IsGitOpsSupported                 bool                        `json:"isGitOpsSupported,omitempty"`
+	IsIdentityServiceSupported        bool                        `json:"isIdentityServiceSupported,omitempty"`
+	IsGeoaxisSupported                bool                        `json:"isGeoaxisSupported,omitempty"`
+	IsSnapshotSupported               bool                        `json:"isSnapshotSupported,omitempty"`
+	IsDisasterRecoverySupported       bool                        `json:"isDisasterRecoverySupported,omitempty"`
+	IsSupportBundleUploadSupported    bool                        `json:"isSupportBundleUploadSupported,omitempty"`
+	IsSemverRequired                  bool                        `json:"isSemverRequired,omitempty"`
+	IsEmbeddedClusterDownloadEnabled  bool                        `json:"isEmbeddedClusterDownloadEnabled,omitempty"`
+	IsEmbeddedClusterMultinodeEnabled bool                        `json:"isEmbeddedClusterMultinodeEnabled,omitempty"`
+	Entitlements                      map[string]EntitlementField `json:"entitlements,omitempty"`
 }
 
 // LicenseStatus defines the observed state of License
