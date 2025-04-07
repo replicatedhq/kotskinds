@@ -93,7 +93,7 @@ spec:
                 type: boolean
               isEmbeddedClusterDownloadEnabled:
                 type: boolean
-              isEmbeddedClusterMultinodeDisabled:
+              isEmbeddedClusterMultinodeEnabled:
                 type: boolean
               isGeoaxisSupported:
                 type: boolean

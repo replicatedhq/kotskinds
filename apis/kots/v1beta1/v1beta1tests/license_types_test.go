@@ -1,6 +1,7 @@
 package v1beta1tests
 
 import (
+	"encoding/json"
 	"testing"
 
 	kotsv1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
@@ -72,5 +73,54 @@ spec:
 	assert.NotNil(t, testField)
 	assert.Equal(t, "test", testField.Title)
 	assert.Equal(t, "123asd", testField.Value.Value())
+}
 
+func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
+	tests := []struct {
+		name     string
+		jsonData string
+		expected bool
+	}{
+		{
+			name: "field is missing, should default to true",
+			jsonData: `{
+				"licenseID": "test-id",
+				"appSlug": "test-app",
+				"signature": "IA=="
+			}`,
+			expected: true,
+		},
+		{
+			name: "field is explicitly set to false",
+			jsonData: `{
+				"licenseID": "test-id",
+				"appSlug": "test-app",
+				"signature": "IA==",
+				"isEmbeddedClusterMultinodeEnabled": false
+			}`,
+			expected: false,
+		},
+		{
+			name: "field is explicitly set to true",
+			jsonData: `{
+				"licenseID": "test-id",
+				"appSlug": "test-app",
+				"signature": "IA==",
+				"isEmbeddedClusterMultinodeEnabled": true
+			}`,
+			expected: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var spec kotsv1beta1.LicenseSpec
+			err := json.Unmarshal([]byte(test.jsonData), &spec)
+			require.NoError(t, err)
+			assert.Equal(t, test.expected, spec.IsEmbeddedClusterMultinodeEnabled)
+			assert.NotEmpty(t, spec.LicenseID)
+			assert.NotEmpty(t, spec.AppSlug)
+			assert.NotEmpty(t, spec.Signature)
+		})
+	}
 }
