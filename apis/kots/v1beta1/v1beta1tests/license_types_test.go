@@ -82,13 +82,13 @@ func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "field is missing, should default to true",
+			name: "field is missing, should default to false",
 			jsonData: `{
 				"licenseID": "test-id",
 				"appSlug": "test-app",
 				"signature": "IA=="
 			}`,
-			expected: true,
+			expected: false,
 		},
 		{
 			name: "field is explicitly set to false",

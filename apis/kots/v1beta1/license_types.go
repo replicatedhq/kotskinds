@@ -135,30 +135,6 @@ type LicenseSpec struct {
 	Entitlements                      map[string]EntitlementField `json:"entitlements,omitempty"`
 }
 
-func (l *LicenseSpec) UnmarshalJSON(data []byte) error {
-	type Alias LicenseSpec
-	als := &struct {
-		IsEmbeddedClusterMultinodeEnabled *bool `json:"isEmbeddedClusterMultinodeEnabled,omitempty"`
-		*Alias
-	}{
-		Alias: (*Alias)(l),
-	}
-
-	if err := json.Unmarshal(data, &als); err != nil {
-		return err
-	}
-
-	if als.IsEmbeddedClusterMultinodeEnabled != nil {
-		l.IsEmbeddedClusterMultinodeEnabled = *als.IsEmbeddedClusterMultinodeEnabled
-	} else {
-		// default to true for old licenses that don't have the field as
-		// that was the default behavior prior to adding this field
-		l.IsEmbeddedClusterMultinodeEnabled = true
-	}
-
-	return nil
-}
-
 // LicenseStatus defines the observed state of License
 type LicenseStatus struct {
 }
