@@ -75,7 +75,7 @@ spec:
 	assert.Equal(t, "123asd", testField.Value.Value())
 }
 
-func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
+func Test_IsEmbeddedClusterMultiNodeEnabled(t *testing.T) {
 	tests := []struct {
 		name     string
 		jsonData string
@@ -96,7 +96,7 @@ func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
 				"licenseID": "test-id",
 				"appSlug": "test-app",
 				"signature": "IA==",
-				"isEmbeddedClusterMultinodeEnabled": false
+				"isEmbeddedClusterMultiNodeEnabled": false
 			}`,
 			expected: false,
 		},
@@ -106,7 +106,7 @@ func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
 				"licenseID": "test-id",
 				"appSlug": "test-app",
 				"signature": "IA==",
-				"isEmbeddedClusterMultinodeEnabled": true
+				"isEmbeddedClusterMultiNodeEnabled": true
 			}`,
 			expected: true,
 		},
@@ -117,7 +117,7 @@ func Test_IsEmbeddedClusterMultinodeEnabled(t *testing.T) {
 			var spec kotsv1beta1.LicenseSpec
 			err := json.Unmarshal([]byte(test.jsonData), &spec)
 			require.NoError(t, err)
-			assert.Equal(t, test.expected, spec.IsEmbeddedClusterMultinodeEnabled)
+			assert.Equal(t, test.expected, spec.IsEmbeddedClusterMultiNodeEnabled)
 			assert.NotEmpty(t, spec.LicenseID)
 			assert.NotEmpty(t, spec.AppSlug)
 			assert.NotEmpty(t, spec.Signature)

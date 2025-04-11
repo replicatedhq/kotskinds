@@ -131,7 +131,7 @@ type LicenseSpec struct {
 	IsSupportBundleUploadSupported    bool                        `json:"isSupportBundleUploadSupported,omitempty"`
 	IsSemverRequired                  bool                        `json:"isSemverRequired,omitempty"`
 	IsEmbeddedClusterDownloadEnabled  bool                        `json:"isEmbeddedClusterDownloadEnabled,omitempty"`
-	IsEmbeddedClusterMultinodeEnabled bool                        `json:"isEmbeddedClusterMultinodeEnabled,omitempty"`
+	IsEmbeddedClusterMultiNodeEnabled bool                        `json:"isEmbeddedClusterMultiNodeEnabled,omitempty"`
 	Entitlements                      map[string]EntitlementField `json:"entitlements,omitempty"`
 }
 
