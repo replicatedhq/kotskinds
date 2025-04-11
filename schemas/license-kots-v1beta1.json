@@ -104,7 +104,7 @@
         "isEmbeddedClusterDownloadEnabled": {
           "type": "boolean"
         },
-        "isEmbeddedClusterMultinodeEnabled": {
+        "isEmbeddedClusterMultiNodeEnabled": {
           "type": "boolean"
         },
         "isGeoaxisSupported": {
