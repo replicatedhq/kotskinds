@@ -55,6 +55,7 @@ type ApplicationSpec struct {
 	MinKotsVersion               string              `json:"minKotsVersion,omitempty"`
 	TargetKotsVersion            string              `json:"targetKotsVersion,omitempty"`
 	AdditionalImages             []string            `json:"additionalImages,omitempty"`
+	ExcludedImages               []string            `json:"excludedImages,omitempty"`
 	AdditionalNamespaces         []string            `json:"additionalNamespaces,omitempty"`
 	RequireMinimalRBACPrivileges bool                `json:"requireMinimalRBACPrivileges,omitempty"`
 	SupportMinimalRBACPrivileges bool                `json:"supportMinimalRBACPrivileges,omitempty"`
