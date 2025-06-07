@@ -71,6 +71,10 @@ spec:
                 items:
                   type: string
                 type: array
+              excludedImages:
+                items:
+                  type: string
+                type: array
               graphs:
                 items:
                   properties:

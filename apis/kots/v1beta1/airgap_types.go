@@ -31,6 +31,7 @@ type AirgapSpec struct {
 	RequiredReleases         []AirgapReleaseMeta       `json:"requiredReleases,omitempty"`
 	SavedImages              []string                  `json:"savedImages,omitempty"`
 	EmbeddedClusterArtifacts *EmbeddedClusterArtifacts `json:"embeddedClusterArtifacts,omitempty"`
+	AirgapUncompressedSize   int64                     `json:"airgapUncompressedSize,omitempty"`
 	Format                   string                    `json:"format,omitempty"`
 	ReplicatedChartNames     []string                  `json:"replicatedChartNames,omitempty"`
 }
