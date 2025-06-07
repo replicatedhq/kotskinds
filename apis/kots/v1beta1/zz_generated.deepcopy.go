@@ -302,6 +302,11 @@ func (in *ApplicationSpec) DeepCopyInto(out *ApplicationSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.ExcludedImages != nil {
+		in, out := &in.ExcludedImages, &out.ExcludedImages
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.AdditionalNamespaces != nil {
 		in, out := &in.AdditionalNamespaces, &out.AdditionalNamespaces
 		*out = make([]string, len(*in))
