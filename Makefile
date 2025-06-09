@@ -53,7 +53,7 @@ endif
 
 check-schemas: generate openapischema
 	@if [ -n "$$(git status --short)" ]; then \
-		echo -e "\033[31mThe git repo is dirty :( Ensure all generated files are committed e.g schema files or generated client files\033[0;m"; \
+		echo -e "\033[31mThe git repo is dirty :( Ensure all generated files using 'make generate openapischema' are committed\033[0;m"; \
 		git status --short; \
 		exit 1; \
 	fi
