@@ -17,10 +17,6 @@
       "description": "AirgapSpec defines the desired state of AirgapSpec",
       "type": "object",
       "properties": {
-        "airgapUncompressedSize": {
-          "type": "integer",
-          "format": "int64"
-        },
         "appSlug": {
           "type": "string"
         },
@@ -111,6 +107,10 @@
         "signature": {
           "type": "string",
           "format": "byte"
+        },
+        "uncompressedSize": {
+          "type": "integer",
+          "format": "int64"
         },
         "updateCursor": {
           "type": "string"
