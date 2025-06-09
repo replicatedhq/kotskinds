@@ -39,9 +39,6 @@ spec:
           spec:
             description: AirgapSpec defines the desired state of AirgapSpec
             properties:
-              airgapUncompressedSize:
-                format: int64
-                type: integer
               appSlug:
                 type: string
               channelID:
@@ -107,6 +104,9 @@ spec:
               signature:
                 format: byte
                 type: string
+              uncompressedSize:
+                format: int64
+                type: integer
               updateCursor:
                 type: string
               versionLabel:
