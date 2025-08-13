@@ -38,9 +38,10 @@ type AirgapSpec struct {
 
 // AirgapStatus defines airgap release metadata
 type AirgapReleaseMeta struct {
-	VersionLabel string `json:"versionLabel,omitempty"`
-	ReleaseNotes string `json:"releaseNotes,omitempty"`
-	UpdateCursor string `json:"updateCursor,omitempty"`
+	VersionLabel           string `json:"versionLabel,omitempty"`
+	ReleaseNotes           string `json:"releaseNotes,omitempty"`
+	UpdateCursor           string `json:"updateCursor,omitempty"`
+	EmbeddedClusterVersion string `json:"embeddedClusterVersion,omitempty"`
 }
 
 // EmbeddedClusterArtifacts maps embedded cluster artifacts to their path
