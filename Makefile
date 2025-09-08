@@ -1,3 +1,6 @@
+.PHONY: all
+all: schemas openapischema
+
 .PHONY: generate
 generate: controller-gen client-gen
 	$(CONTROLLER_GEN) \
@@ -45,15 +48,16 @@ endif
 .PHONY: client-gen
 client-gen:
 ifeq (, $(shell which client-gen))
-	go install k8s.io/code-generator/cmd/client-gen@v0.20.4
+	go install k8s.io/code-generator/cmd/client-gen@v0.27.4
 CLIENT_GEN=$(shell go env GOPATH)/bin/client-gen
 else
 CLIENT_GEN=$(shell which client-gen)
 endif
 
-check-schemas: schemas openapischema
+.PHONY: check-schemas
+check-schemas: all
 	@if [ -n "$$(git status --short)" ]; then \
-		echo -e "\033[31mThe git repo is dirty :( Ensure all generated files using 'make schemas openapischema' are committed\033[0;m"; \
+		echo -e "\033[31mThe git repo is dirty :( Ensure all generated files using 'make all' are committed\033[0;m"; \
 		git status --short; \
 		exit 1; \
 	fi

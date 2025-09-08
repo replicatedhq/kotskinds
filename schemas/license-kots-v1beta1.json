@@ -83,6 +83,15 @@
               "isHidden": {
                 "type": "boolean"
               },
+              "signature": {
+                "type": "object",
+                "properties": {
+                  "v1": {
+                    "type": "string",
+                    "format": "byte"
+                  }
+                }
+              },
               "title": {
                 "type": "string"
               },
