@@ -79,6 +79,12 @@ spec:
                       type: string
                     isHidden:
                       type: boolean
+                    signature:
+                      properties:
+                        v1:
+                          format: byte
+                          type: string
+                      type: object
                     title:
                       type: string
                     value:

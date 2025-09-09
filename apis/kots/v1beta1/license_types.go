@@ -91,11 +91,16 @@ func (entitlementValue *EntitlementValue) UnmarshalJSON(value []byte) error {
 }
 
 type EntitlementField struct {
-	Title       string           `json:"title,omitempty"`
-	Description string           `json:"description,omitempty"`
-	Value       EntitlementValue `json:"value,omitempty"`
-	ValueType   string           `json:"valueType,omitempty"`
-	IsHidden    bool             `json:"isHidden,omitempty"`
+	Title       string                    `json:"title,omitempty"`
+	Description string                    `json:"description,omitempty"`
+	Value       EntitlementValue          `json:"value,omitempty"`
+	ValueType   string                    `json:"valueType,omitempty"`
+	IsHidden    bool                      `json:"isHidden,omitempty"`
+	Signature   EntitlementFieldSignature `json:"signature,omitempty"`
+}
+
+type EntitlementFieldSignature struct {
+	V1 []byte `json:"v1,omitempty"`
 }
 
 type Channel struct {
