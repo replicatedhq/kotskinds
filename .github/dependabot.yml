@@ -1,0 +1,38 @@
+---
+version: 2
+updates:
+
+  ## Go mod
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "02:30"
+    labels:
+      - "dependabot"
+      - "go"
+      - "type::chore"
+    groups:
+      security:
+        update-types:
+          - "patch"
+      k8s.io:
+        patterns:
+          - "k8s.io/*"
+
+  ## GitHub Actions
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "02:30"
+    labels:
+      - "dependabot"
+      - "github-actions"
+      - "type::chore"
