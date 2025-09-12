@@ -18,123 +18,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeIngressConfigs implements IngressConfigInterface
-type FakeIngressConfigs struct {
+// fakeIngressConfigs implements IngressConfigInterface
+type fakeIngressConfigs struct {
+	*gentype.FakeClientWithList[*v1beta1.IngressConfig, *v1beta1.IngressConfigList]
 	Fake *FakeKotsV1beta1
-	ns   string
 }
 
-var ingressconfigsResource = v1beta1.SchemeGroupVersion.WithResource("ingressconfigs")
-
-var ingressconfigsKind = v1beta1.SchemeGroupVersion.WithKind("IngressConfig")
-
-// Get takes name of the ingressConfig, and returns the corresponding ingressConfig object, and an error if there is any.
-func (c *FakeIngressConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.IngressConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(ingressconfigsResource, c.ns, name), &v1beta1.IngressConfig{})
-
-	if obj == nil {
-		return nil, err
+func newFakeIngressConfigs(fake *FakeKotsV1beta1, namespace string) kotsv1beta1.IngressConfigInterface {
+	return &fakeIngressConfigs{
+		gentype.NewFakeClientWithList[*v1beta1.IngressConfig, *v1beta1.IngressConfigList](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("ingressconfigs"),
+			v1beta1.SchemeGroupVersion.WithKind("IngressConfig"),
+			func() *v1beta1.IngressConfig { return &v1beta1.IngressConfig{} },
+			func() *v1beta1.IngressConfigList { return &v1beta1.IngressConfigList{} },
+			func(dst, src *v1beta1.IngressConfigList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.IngressConfigList) []*v1beta1.IngressConfig {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1beta1.IngressConfigList, items []*v1beta1.IngressConfig) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta1.IngressConfig), err
-}
-
-// List takes label and field selectors, and returns the list of IngressConfigs that match those selectors.
-func (c *FakeIngressConfigs) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.IngressConfigList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(ingressconfigsResource, ingressconfigsKind, c.ns, opts), &v1beta1.IngressConfigList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.IngressConfigList{ListMeta: obj.(*v1beta1.IngressConfigList).ListMeta}
-	for _, item := range obj.(*v1beta1.IngressConfigList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested ingressConfigs.
-func (c *FakeIngressConfigs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(ingressconfigsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a ingressConfig and creates it.  Returns the server's representation of the ingressConfig, and an error, if there is any.
-func (c *FakeIngressConfigs) Create(ctx context.Context, ingressConfig *v1beta1.IngressConfig, opts v1.CreateOptions) (result *v1beta1.IngressConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(ingressconfigsResource, c.ns, ingressConfig), &v1beta1.IngressConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IngressConfig), err
-}
-
-// Update takes the representation of a ingressConfig and updates it. Returns the server's representation of the ingressConfig, and an error, if there is any.
-func (c *FakeIngressConfigs) Update(ctx context.Context, ingressConfig *v1beta1.IngressConfig, opts v1.UpdateOptions) (result *v1beta1.IngressConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(ingressconfigsResource, c.ns, ingressConfig), &v1beta1.IngressConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IngressConfig), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIngressConfigs) UpdateStatus(ctx context.Context, ingressConfig *v1beta1.IngressConfig, opts v1.UpdateOptions) (*v1beta1.IngressConfig, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(ingressconfigsResource, "status", c.ns, ingressConfig), &v1beta1.IngressConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IngressConfig), err
-}
-
-// Delete takes name of the ingressConfig and deletes it. Returns an error if one occurs.
-func (c *FakeIngressConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(ingressconfigsResource, c.ns, name, opts), &v1beta1.IngressConfig{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeIngressConfigs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(ingressconfigsResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.IngressConfigList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched ingressConfig.
-func (c *FakeIngressConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.IngressConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(ingressconfigsResource, c.ns, name, pt, data, subresources...), &v1beta1.IngressConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IngressConfig), err
 }
