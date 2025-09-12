@@ -1,6 +1,6 @@
 module github.com/replicatedhq/kotskinds
 
-go 1.24.0
+go 1.24.6
 
 require (
 	github.com/go-test/deep v1.1.1
@@ -14,7 +14,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.34.1
 	k8s.io/apimachinery v0.34.1
 	k8s.io/client-go v0.34.1
-	sigs.k8s.io/controller-runtime v0.15.0
+	sigs.k8s.io/controller-runtime v0.22.1
 )
 
 require (
