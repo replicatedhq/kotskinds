@@ -18,123 +18,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeIdentityConfigs implements IdentityConfigInterface
-type FakeIdentityConfigs struct {
+// fakeIdentityConfigs implements IdentityConfigInterface
+type fakeIdentityConfigs struct {
+	*gentype.FakeClientWithList[*v1beta1.IdentityConfig, *v1beta1.IdentityConfigList]
 	Fake *FakeKotsV1beta1
-	ns   string
 }
 
-var identityconfigsResource = v1beta1.SchemeGroupVersion.WithResource("identityconfigs")
-
-var identityconfigsKind = v1beta1.SchemeGroupVersion.WithKind("IdentityConfig")
-
-// Get takes name of the identityConfig, and returns the corresponding identityConfig object, and an error if there is any.
-func (c *FakeIdentityConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.IdentityConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(identityconfigsResource, c.ns, name), &v1beta1.IdentityConfig{})
-
-	if obj == nil {
-		return nil, err
+func newFakeIdentityConfigs(fake *FakeKotsV1beta1, namespace string) kotsv1beta1.IdentityConfigInterface {
+	return &fakeIdentityConfigs{
+		gentype.NewFakeClientWithList[*v1beta1.IdentityConfig, *v1beta1.IdentityConfigList](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("identityconfigs"),
+			v1beta1.SchemeGroupVersion.WithKind("IdentityConfig"),
+			func() *v1beta1.IdentityConfig { return &v1beta1.IdentityConfig{} },
+			func() *v1beta1.IdentityConfigList { return &v1beta1.IdentityConfigList{} },
+			func(dst, src *v1beta1.IdentityConfigList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.IdentityConfigList) []*v1beta1.IdentityConfig {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1beta1.IdentityConfigList, items []*v1beta1.IdentityConfig) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta1.IdentityConfig), err
-}
-
-// List takes label and field selectors, and returns the list of IdentityConfigs that match those selectors.
-func (c *FakeIdentityConfigs) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.IdentityConfigList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(identityconfigsResource, identityconfigsKind, c.ns, opts), &v1beta1.IdentityConfigList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.IdentityConfigList{ListMeta: obj.(*v1beta1.IdentityConfigList).ListMeta}
-	for _, item := range obj.(*v1beta1.IdentityConfigList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested identityConfigs.
-func (c *FakeIdentityConfigs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(identityconfigsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a identityConfig and creates it.  Returns the server's representation of the identityConfig, and an error, if there is any.
-func (c *FakeIdentityConfigs) Create(ctx context.Context, identityConfig *v1beta1.IdentityConfig, opts v1.CreateOptions) (result *v1beta1.IdentityConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(identityconfigsResource, c.ns, identityConfig), &v1beta1.IdentityConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IdentityConfig), err
-}
-
-// Update takes the representation of a identityConfig and updates it. Returns the server's representation of the identityConfig, and an error, if there is any.
-func (c *FakeIdentityConfigs) Update(ctx context.Context, identityConfig *v1beta1.IdentityConfig, opts v1.UpdateOptions) (result *v1beta1.IdentityConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(identityconfigsResource, c.ns, identityConfig), &v1beta1.IdentityConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IdentityConfig), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIdentityConfigs) UpdateStatus(ctx context.Context, identityConfig *v1beta1.IdentityConfig, opts v1.UpdateOptions) (*v1beta1.IdentityConfig, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(identityconfigsResource, "status", c.ns, identityConfig), &v1beta1.IdentityConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IdentityConfig), err
-}
-
-// Delete takes name of the identityConfig and deletes it. Returns an error if one occurs.
-func (c *FakeIdentityConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(identityconfigsResource, c.ns, name, opts), &v1beta1.IdentityConfig{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeIdentityConfigs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(identityconfigsResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.IdentityConfigList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched identityConfig.
-func (c *FakeIdentityConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.IdentityConfig, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(identityconfigsResource, c.ns, name, pt, data, subresources...), &v1beta1.IdentityConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.IdentityConfig), err
 }

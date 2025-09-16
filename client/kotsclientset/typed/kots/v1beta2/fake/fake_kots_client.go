@@ -28,7 +28,7 @@ type FakeKotsV1beta2 struct {
 }
 
 func (c *FakeKotsV1beta2) HelmCharts(namespace string) v1beta2.HelmChartInterface {
-	return &FakeHelmCharts{c, namespace}
+	return newFakeHelmCharts(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

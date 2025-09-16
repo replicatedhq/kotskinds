@@ -28,47 +28,47 @@ type FakeKotsV1beta1 struct {
 }
 
 func (c *FakeKotsV1beta1) Airgaps(namespace string) v1beta1.AirgapInterface {
-	return &FakeAirgaps{c, namespace}
+	return newFakeAirgaps(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) Applications(namespace string) v1beta1.ApplicationInterface {
-	return &FakeApplications{c, namespace}
+	return newFakeApplications(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) Configs(namespace string) v1beta1.ConfigInterface {
-	return &FakeConfigs{c, namespace}
+	return newFakeConfigs(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) ConfigValueses(namespace string) v1beta1.ConfigValuesInterface {
-	return &FakeConfigValueses{c, namespace}
+	return newFakeConfigValueses(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) HelmCharts(namespace string) v1beta1.HelmChartInterface {
-	return &FakeHelmCharts{c, namespace}
+	return newFakeHelmCharts(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) Identities(namespace string) v1beta1.IdentityInterface {
-	return &FakeIdentities{c, namespace}
+	return newFakeIdentities(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) IdentityConfigs(namespace string) v1beta1.IdentityConfigInterface {
-	return &FakeIdentityConfigs{c, namespace}
+	return newFakeIdentityConfigs(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) IngressConfigs(namespace string) v1beta1.IngressConfigInterface {
-	return &FakeIngressConfigs{c, namespace}
+	return newFakeIngressConfigs(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) Installations(namespace string) v1beta1.InstallationInterface {
-	return &FakeInstallations{c, namespace}
+	return newFakeInstallations(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) Licenses(namespace string) v1beta1.LicenseInterface {
-	return &FakeLicenses{c, namespace}
+	return newFakeLicenses(c, namespace)
 }
 
 func (c *FakeKotsV1beta1) LintConfigs(namespace string) v1beta1.LintConfigInterface {
-	return &FakeLintConfigs{c, namespace}
+	return newFakeLintConfigs(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

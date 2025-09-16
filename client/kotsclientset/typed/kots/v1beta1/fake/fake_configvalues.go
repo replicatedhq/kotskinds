@@ -18,123 +18,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeConfigValueses implements ConfigValuesInterface
-type FakeConfigValueses struct {
+// fakeConfigValueses implements ConfigValuesInterface
+type fakeConfigValueses struct {
+	*gentype.FakeClientWithList[*v1beta1.ConfigValues, *v1beta1.ConfigValuesList]
 	Fake *FakeKotsV1beta1
-	ns   string
 }
 
-var configvaluesesResource = v1beta1.SchemeGroupVersion.WithResource("configvalueses")
-
-var configvaluesesKind = v1beta1.SchemeGroupVersion.WithKind("ConfigValues")
-
-// Get takes name of the configValues, and returns the corresponding configValues object, and an error if there is any.
-func (c *FakeConfigValueses) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.ConfigValues, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(configvaluesesResource, c.ns, name), &v1beta1.ConfigValues{})
-
-	if obj == nil {
-		return nil, err
+func newFakeConfigValueses(fake *FakeKotsV1beta1, namespace string) kotsv1beta1.ConfigValuesInterface {
+	return &fakeConfigValueses{
+		gentype.NewFakeClientWithList[*v1beta1.ConfigValues, *v1beta1.ConfigValuesList](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("configvalueses"),
+			v1beta1.SchemeGroupVersion.WithKind("ConfigValues"),
+			func() *v1beta1.ConfigValues { return &v1beta1.ConfigValues{} },
+			func() *v1beta1.ConfigValuesList { return &v1beta1.ConfigValuesList{} },
+			func(dst, src *v1beta1.ConfigValuesList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.ConfigValuesList) []*v1beta1.ConfigValues {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1beta1.ConfigValuesList, items []*v1beta1.ConfigValues) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta1.ConfigValues), err
-}
-
-// List takes label and field selectors, and returns the list of ConfigValueses that match those selectors.
-func (c *FakeConfigValueses) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.ConfigValuesList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(configvaluesesResource, configvaluesesKind, c.ns, opts), &v1beta1.ConfigValuesList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.ConfigValuesList{ListMeta: obj.(*v1beta1.ConfigValuesList).ListMeta}
-	for _, item := range obj.(*v1beta1.ConfigValuesList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested configValueses.
-func (c *FakeConfigValueses) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(configvaluesesResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a configValues and creates it.  Returns the server's representation of the configValues, and an error, if there is any.
-func (c *FakeConfigValueses) Create(ctx context.Context, configValues *v1beta1.ConfigValues, opts v1.CreateOptions) (result *v1beta1.ConfigValues, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(configvaluesesResource, c.ns, configValues), &v1beta1.ConfigValues{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ConfigValues), err
-}
-
-// Update takes the representation of a configValues and updates it. Returns the server's representation of the configValues, and an error, if there is any.
-func (c *FakeConfigValueses) Update(ctx context.Context, configValues *v1beta1.ConfigValues, opts v1.UpdateOptions) (result *v1beta1.ConfigValues, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(configvaluesesResource, c.ns, configValues), &v1beta1.ConfigValues{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ConfigValues), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeConfigValueses) UpdateStatus(ctx context.Context, configValues *v1beta1.ConfigValues, opts v1.UpdateOptions) (*v1beta1.ConfigValues, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(configvaluesesResource, "status", c.ns, configValues), &v1beta1.ConfigValues{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ConfigValues), err
-}
-
-// Delete takes name of the configValues and deletes it. Returns an error if one occurs.
-func (c *FakeConfigValueses) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(configvaluesesResource, c.ns, name, opts), &v1beta1.ConfigValues{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeConfigValueses) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(configvaluesesResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.ConfigValuesList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched configValues.
-func (c *FakeConfigValueses) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.ConfigValues, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(configvaluesesResource, c.ns, name, pt, data, subresources...), &v1beta1.ConfigValues{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ConfigValues), err
 }

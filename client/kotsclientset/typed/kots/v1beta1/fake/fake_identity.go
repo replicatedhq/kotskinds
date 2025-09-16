@@ -18,123 +18,32 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeIdentities implements IdentityInterface
-type FakeIdentities struct {
+// fakeIdentities implements IdentityInterface
+type fakeIdentities struct {
+	*gentype.FakeClientWithList[*v1beta1.Identity, *v1beta1.IdentityList]
 	Fake *FakeKotsV1beta1
-	ns   string
 }
 
-var identitiesResource = v1beta1.SchemeGroupVersion.WithResource("identities")
-
-var identitiesKind = v1beta1.SchemeGroupVersion.WithKind("Identity")
-
-// Get takes name of the identity, and returns the corresponding identity object, and an error if there is any.
-func (c *FakeIdentities) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Identity, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(identitiesResource, c.ns, name), &v1beta1.Identity{})
-
-	if obj == nil {
-		return nil, err
+func newFakeIdentities(fake *FakeKotsV1beta1, namespace string) kotsv1beta1.IdentityInterface {
+	return &fakeIdentities{
+		gentype.NewFakeClientWithList[*v1beta1.Identity, *v1beta1.IdentityList](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("identities"),
+			v1beta1.SchemeGroupVersion.WithKind("Identity"),
+			func() *v1beta1.Identity { return &v1beta1.Identity{} },
+			func() *v1beta1.IdentityList { return &v1beta1.IdentityList{} },
+			func(dst, src *v1beta1.IdentityList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.IdentityList) []*v1beta1.Identity { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1beta1.IdentityList, items []*v1beta1.Identity) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta1.Identity), err
-}
-
-// List takes label and field selectors, and returns the list of Identities that match those selectors.
-func (c *FakeIdentities) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.IdentityList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(identitiesResource, identitiesKind, c.ns, opts), &v1beta1.IdentityList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.IdentityList{ListMeta: obj.(*v1beta1.IdentityList).ListMeta}
-	for _, item := range obj.(*v1beta1.IdentityList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested identities.
-func (c *FakeIdentities) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(identitiesResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a identity and creates it.  Returns the server's representation of the identity, and an error, if there is any.
-func (c *FakeIdentities) Create(ctx context.Context, identity *v1beta1.Identity, opts v1.CreateOptions) (result *v1beta1.Identity, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(identitiesResource, c.ns, identity), &v1beta1.Identity{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.Identity), err
-}
-
-// Update takes the representation of a identity and updates it. Returns the server's representation of the identity, and an error, if there is any.
-func (c *FakeIdentities) Update(ctx context.Context, identity *v1beta1.Identity, opts v1.UpdateOptions) (result *v1beta1.Identity, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(identitiesResource, c.ns, identity), &v1beta1.Identity{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.Identity), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIdentities) UpdateStatus(ctx context.Context, identity *v1beta1.Identity, opts v1.UpdateOptions) (*v1beta1.Identity, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(identitiesResource, "status", c.ns, identity), &v1beta1.Identity{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.Identity), err
-}
-
-// Delete takes name of the identity and deletes it. Returns an error if one occurs.
-func (c *FakeIdentities) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(identitiesResource, c.ns, name, opts), &v1beta1.Identity{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeIdentities) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(identitiesResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.IdentityList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched identity.
-func (c *FakeIdentities) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Identity, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(identitiesResource, c.ns, name, pt, data, subresources...), &v1beta1.Identity{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.Identity), err
 }

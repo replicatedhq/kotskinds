@@ -18,8 +18,8 @@ limitations under the License.
 package kotsclientset
 
 import (
-	"fmt"
-	"net/http"
+	fmt "fmt"
+	http "net/http"
 
 	kotsv1beta1 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta1"
 	kotsv1beta2 "github.com/replicatedhq/kotskinds/client/kotsclientset/typed/kots/v1beta2"

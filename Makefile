@@ -12,11 +12,12 @@ generate: controller-gen client-gen
 		paths=./apis/kots/v1beta1/... \
 		paths=./apis/kots/v1beta2/...
 	$(CLIENT_GEN) \
-		--output-package=github.com/replicatedhq/kotskinds/client \
+		--output-pkg=github.com/replicatedhq/kotskinds/client \
+		--output-dir ./client \
 		--clientset-name kotsclientset \
 		--input-base github.com/replicatedhq/kotskinds/apis \
 		--input kots/v1beta1,kots/v1beta2 \
-		-h ./hack/boilerplate.go.txt
+		--go-header-file ./hack/boilerplate.go.txt
 
 
 .PHONY: openapischema
@@ -39,7 +40,7 @@ fmt:
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.19.0
 CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
@@ -48,7 +49,7 @@ endif
 .PHONY: client-gen
 client-gen:
 ifeq (, $(shell which client-gen))
-	go install k8s.io/code-generator/cmd/client-gen@v0.27.4
+	go install k8s.io/code-generator/cmd/client-gen@v0.34.1
 CLIENT_GEN=$(shell go env GOPATH)/bin/client-gen
 else
 CLIENT_GEN=$(shell which client-gen)
