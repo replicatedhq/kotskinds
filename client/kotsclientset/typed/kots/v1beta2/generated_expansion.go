@@ -18,3 +18,5 @@ limitations under the License.
 package v1beta2
 
 type HelmChartExpansion interface{}
+
+type LicenseExpansion interface{}

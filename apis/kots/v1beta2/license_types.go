@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package v1beta2
 
 import (
 	"encoding/json"
@@ -47,7 +47,6 @@ func (entitlementValue *EntitlementValue) Value() interface{} {
 	} else if entitlementValue.Type == Bool {
 		return entitlementValue.BoolVal
 	}
-
 	return entitlementValue.StrVal
 }
 
@@ -55,13 +54,10 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 	switch entitlementValue.Type {
 	case Int:
 		return json.Marshal(entitlementValue.IntVal)
-
 	case String:
 		return json.Marshal(entitlementValue.StrVal)
-
 	case Bool:
 		return json.Marshal(entitlementValue.BoolVal)
-
 	default:
 		return []byte{}, fmt.Errorf("impossible EntitlementValue.Type")
 	}
@@ -100,7 +96,7 @@ type EntitlementField struct {
 }
 
 type EntitlementFieldSignature struct {
-	V1 []byte `json:"v1,omitempty"`
+	V2 []byte `json:"v2,omitempty"` // SHA-256 signature for v1beta2
 }
 
 type Channel struct {
@@ -113,9 +109,9 @@ type Channel struct {
 	IsSemverRequired      bool   `json:"isSemverRequired,omitempty"`
 }
 
-// LicenseSpec defines the desired state of LicenseSpec
+// LicenseSpec defines the desired state of LicenseSpec for v1beta2
 type LicenseSpec struct {
-	Signature                         []byte                      `json:"signature"`
+	Signature256                      []byte                      `json:"signature256"` // SHA-256 signature
 	AppSlug                           string                      `json:"appSlug"`
 	Endpoint                          string                      `json:"endpoint,omitempty"`
 	ReplicatedProxyDomain             string                      `json:"replicatedProxyDomain,omitempty"`
@@ -146,10 +142,10 @@ type LicenseStatus struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// License is the Schema for the license API
+// License is the Schema for the license API for v1beta2
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:storageversion
+// NOTE: No +kubebuilder:storageversion annotation - v1beta1 remains storage version
 type License struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

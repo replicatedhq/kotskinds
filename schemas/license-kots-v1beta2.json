@@ -1,0 +1,161 @@
+{
+  "description": "License is the Schema for the license API for v1beta2\nNOTE: No +kubebuilder:storageversion annotation - v1beta1 remains storage version",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "spec": {
+      "description": "LicenseSpec defines the desired state of LicenseSpec for v1beta2",
+      "type": "object",
+      "required": [
+        "appSlug",
+        "licenseID",
+        "signature256"
+      ],
+      "properties": {
+        "appSlug": {
+          "type": "string"
+        },
+        "channelID": {
+          "type": "string"
+        },
+        "channelName": {
+          "type": "string"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "channelID"
+            ],
+            "properties": {
+              "channelID": {
+                "type": "string"
+              },
+              "channelName": {
+                "type": "string"
+              },
+              "channelSlug": {
+                "type": "string"
+              },
+              "endpoint": {
+                "type": "string"
+              },
+              "isDefault": {
+                "type": "boolean"
+              },
+              "isSemverRequired": {
+                "type": "boolean"
+              },
+              "replicatedProxyDomain": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "customerEmail": {
+          "type": "string"
+        },
+        "customerName": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "entitlements": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "isHidden": {
+                "type": "boolean"
+              },
+              "signature": {
+                "type": "object",
+                "properties": {
+                  "v2": {
+                    "type": "string",
+                    "format": "byte"
+                  }
+                }
+              },
+              "title": {
+                "type": "string"
+              },
+              "value": {
+                "type": "object"
+              },
+              "valueType": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "isAirgapSupported": {
+          "type": "boolean"
+        },
+        "isDisasterRecoverySupported": {
+          "type": "boolean"
+        },
+        "isEmbeddedClusterDownloadEnabled": {
+          "type": "boolean"
+        },
+        "isEmbeddedClusterMultiNodeEnabled": {
+          "type": "boolean"
+        },
+        "isGeoaxisSupported": {
+          "type": "boolean"
+        },
+        "isGitOpsSupported": {
+          "type": "boolean"
+        },
+        "isIdentityServiceSupported": {
+          "type": "boolean"
+        },
+        "isSemverRequired": {
+          "type": "boolean"
+        },
+        "isSnapshotSupported": {
+          "type": "boolean"
+        },
+        "isSupportBundleUploadSupported": {
+          "type": "boolean"
+        },
+        "licenseID": {
+          "type": "string"
+        },
+        "licenseSequence": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "licenseType": {
+          "type": "string"
+        },
+        "replicatedProxyDomain": {
+          "type": "string"
+        },
+        "signature256": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "status": {
+      "description": "LicenseStatus defines the observed state of License",
+      "type": "object"
+    }
+  }
+}
