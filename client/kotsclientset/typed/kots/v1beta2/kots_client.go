@@ -28,6 +28,7 @@ import (
 type KotsV1beta2Interface interface {
 	RESTClient() rest.Interface
 	HelmChartsGetter
+	LicensesGetter
 }
 
 // KotsV1beta2Client is used to interact with features provided by the kots.io group.
@@ -37,6 +38,10 @@ type KotsV1beta2Client struct {
 
 func (c *KotsV1beta2Client) HelmCharts(namespace string) HelmChartInterface {
 	return newHelmCharts(c, namespace)
+}
+
+func (c *KotsV1beta2Client) Licenses(namespace string) LicenseInterface {
+	return newLicenses(c, namespace)
 }
 
 // NewForConfig creates a new KotsV1beta2Client for the given config.
