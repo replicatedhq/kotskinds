@@ -192,7 +192,7 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 		return nil, errors.New("v1 license signature not found")
 	}
 
-	// Verify the license signature
+	// Verify that the license data is signed by the application key
 	if err := kotscrypto.VerifySignatureRSA(outerSig.LicenseData, innerSig.LicenseSignature, innerSig.PublicKey, crypto.MD5); err != nil {
 		return nil, errors.Wrap(err, "v1 license signature verification failed")
 	}
@@ -201,7 +201,6 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 		return nil, errors.New("v1 key signature not found")
 	}
 
-	// Verify key signature
 	var keySig kotscrypto.KeySignature
 	if err := json.Unmarshal(innerSig.KeySignature, &keySig); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal key signature")
@@ -212,11 +211,12 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 		return nil, errors.Wrap(err, "failed to find global public key")
 	}
 
+	// verify that the application public key is signed by the global key
 	if err := kotscrypto.VerifySignatureRSA([]byte(innerSig.PublicKey), keySig.Signature, globalPubKey, crypto.MD5); err != nil {
 		return nil, errors.Wrap(err, "v1 key signature verification failed")
 	}
 
-	// Validate all entitlement signatures
+	// validate that each entitlement value is signed by the application key
 	for fieldName, field := range l.Spec.Entitlements {
 		if err := field.ValidateSignature(appKeys); err != nil {
 			return nil, errors.Wrapf(err, "entitlement validation failed for field: %s", fieldName)
