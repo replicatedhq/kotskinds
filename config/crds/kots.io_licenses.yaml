@@ -249,13 +249,13 @@ spec:
                 type: string
               replicatedProxyDomain:
                 type: string
-              signature256:
+              signature:
                 format: byte
                 type: string
             required:
             - appSlug
             - licenseID
-            - signature256
+            - signature
             type: object
           status:
             description: LicenseStatus defines the observed state of License

@@ -42,7 +42,7 @@ spec:
     test:
       title: test
       value: "123asd"
-  signature256: SUE9PQ==`
+  signature: SUE9PQ==`
 
 	kotsscheme.AddToScheme(scheme.Scheme)
 
@@ -57,7 +57,7 @@ spec:
 	license := obj.(*kotsv1beta2.License)
 
 	assert.Equal(t, "abcdef", license.Spec.LicenseID)
-	assert.NotEmpty(t, license.Spec.Signature256)
+	assert.NotEmpty(t, license.Spec.Signature)
 
 	entitlements := license.Spec.Entitlements
 	assert.Len(t, entitlements, 6)
@@ -79,7 +79,7 @@ spec:
 	assert.Equal(t, "123asd", testField.Value.Value())
 }
 
-func Test_Signature256Field(t *testing.T) {
+func Test_SignatureField(t *testing.T) {
 	tests := []struct {
 		name     string
 		jsonData string
@@ -87,11 +87,11 @@ func Test_Signature256Field(t *testing.T) {
 		hasError bool
 	}{
 		{
-			name: "signature256 field is present",
+			name: "signature field is present",
 			jsonData: `{
 				"licenseID": "test-id",
 				"appSlug": "test-app",
-				"signature256": "SUE9PQ=="
+				"signature": "SUE9PQ=="
 			}`,
 			expected: []byte("IA=="),
 			hasError: false,
@@ -107,7 +107,7 @@ func Test_Signature256Field(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, test.expected, spec.Signature256)
+			assert.Equal(t, test.expected, spec.Signature)
 			assert.NotEmpty(t, spec.LicenseID)
 			assert.NotEmpty(t, spec.AppSlug)
 		})
