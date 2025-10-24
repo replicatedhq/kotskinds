@@ -178,21 +178,6 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 		return nil, errors.Wrap(err, "failed to decode signature")
 	}
 
-	// Validate license data matches
-	if err := l.compareLicenseData(outerSig.LicenseData); err != nil {
-		return nil, errors.Wrap(err, "license data validation failed")
-	}
-
-	// v1beta2 should use SHA-256 signatures
-	if len(innerSig.V2LicenseSignature) == 0 {
-		return nil, errors.New("v2 license signature not found")
-	}
-
-	// Verify that the license data is signed by the application key
-	if err := kotscrypto.VerifySignatureRSA(outerSig.LicenseData, innerSig.V2LicenseSignature, innerSig.PublicKey, crypto.SHA256); err != nil {
-		return nil, errors.Wrap(err, "v2 license signature verification failed")
-	}
-
 	if len(innerSig.V2KeySignature) == 0 {
 		return nil, errors.New("v2 key signature not found")
 	}
@@ -212,11 +197,29 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 		return nil, errors.Wrap(err, "v2 key signature verification failed")
 	}
 
+	if len(innerSig.V2LicenseSignature) == 0 {
+		return nil, errors.New("v2 license signature not found")
+	}
+
+	// verify that the license data is signed by the application key
+	if err := kotscrypto.VerifySignatureRSA(outerSig.LicenseData, innerSig.V2LicenseSignature, innerSig.PublicKey, crypto.SHA256); err != nil {
+		return nil, errors.Wrap(err, "v2 license signature verification failed")
+	}
+
 	// validate that each entitlement value is signed by the application key
 	for fieldName, field := range l.Spec.Entitlements {
+		// the entitlement values are still covered as part of the entire license body, and some old license files did not include entitlement signatures
+		if len(field.Signature.V2) == 0 {
+			continue
+		}
 		if err := field.ValidateSignature(appKeys); err != nil {
 			return nil, errors.Wrapf(err, "entitlement validation failed for field: %s", fieldName)
 		}
+	}
+
+	// Validate license data matches what was signed
+	if err := l.compareLicenseData(outerSig.LicenseData); err != nil {
+		return nil, errors.Wrap(err, "license data validation failed")
 	}
 
 	return appKeys, nil
