@@ -17,12 +17,14 @@ limitations under the License.
 package v1beta1
 
 import (
+	"crypto"
 	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
 
+	kotscrypto "github.com/replicatedhq/kotskinds/pkg/crypto"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -169,4 +171,206 @@ type LicenseList struct {
 
 func init() {
 	SchemeBuilder.Register(&License{}, &LicenseList{})
+}
+
+// ValidateLicense validates the entire v1beta1 license signature and all entitlement signatures
+// Returns the app signing keys on success (used for validating entitlement signatures), or an error if validation fails
+func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
+	// Decode and parse the signature
+	outerSig, innerSig, appKeys, err := kotscrypto.DecodeLicenseSignature(l.Spec.Signature)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode signature")
+	}
+
+	// Validate license data matches
+	if err := l.compareLicenseData(outerSig.LicenseData); err != nil {
+		return nil, errors.Wrap(err, "license data validation failed")
+	}
+
+	// v1beta1 should use MD5 signatures
+	if len(innerSig.LicenseSignature) == 0 {
+		return nil, errors.New("v1 license signature not found")
+	}
+
+	// Verify the license signature
+	if err := kotscrypto.VerifySignatureRSA(outerSig.LicenseData, innerSig.LicenseSignature, innerSig.PublicKey, crypto.MD5); err != nil {
+		return nil, errors.Wrap(err, "v1 license signature verification failed")
+	}
+
+	if len(innerSig.KeySignature) == 0 {
+		return nil, errors.New("v1 key signature not found")
+	}
+
+	// Verify key signature
+	var keySig kotscrypto.KeySignature
+	if err := json.Unmarshal(innerSig.KeySignature, &keySig); err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshal key signature")
+	}
+
+	globalPubKey, err := kotscrypto.FindGlobalPublicKeyRSA(keySig.GlobalKeyID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find global public key")
+	}
+
+	if err := kotscrypto.VerifySignatureRSA([]byte(innerSig.PublicKey), keySig.Signature, globalPubKey, crypto.MD5); err != nil {
+		return nil, errors.Wrap(err, "v1 key signature verification failed")
+	}
+
+	// Validate all entitlement signatures
+	for fieldName, field := range l.Spec.Entitlements {
+		if err := field.ValidateSignature(appKeys); err != nil {
+			return nil, errors.Wrapf(err, "entitlement validation failed for field: %s", fieldName)
+		}
+	}
+
+	return appKeys, nil
+}
+
+// ValidateSignature validates a single v1beta1 entitlement signature
+func (in *EntitlementField) ValidateSignature(appKeys *kotscrypto.AppSigningKeys) error {
+	// Check if signature is present
+	if len(in.Signature.V1) == 0 {
+		return errors.New("v1 signature not found for entitlement")
+	}
+
+	// Get the value as a string
+	value := in.Value.Value()
+	message := []byte(fmt.Sprint(value))
+
+	// Verify the signature using the crypto package
+	if err := kotscrypto.VerifySignatureWithKeyRSA(message, in.Signature.V1, appKeys.PublicKeyRSA, crypto.MD5); err != nil {
+		return errors.Wrap(err, "v1 entitlement signature verification failed")
+	}
+
+	return nil
+}
+
+// compareLicenseData decodes the provided license json (from a signature) and compares it to the license data in the calling license
+func (l *License) compareLicenseData(signedJSON []byte) error {
+	// Decode the license JSON
+	var signedData License
+	if err := json.Unmarshal(signedJSON, &signedData); err != nil {
+		return errors.Wrap(err, "failed to unmarshal signed license data")
+	}
+
+	// Compare each field in l.Spec against the decoded license
+	if l.Spec.AppSlug != signedData.Spec.AppSlug {
+		return errors.Errorf(`"appSlug" field has changed to %q (license) from %q (within signature)`, l.Spec.AppSlug, signedData.Spec.AppSlug)
+	}
+	if l.Spec.Endpoint != signedData.Spec.Endpoint {
+		return errors.Errorf(`"endpoint" field has changed to %q (license) from %q (within signature)`, l.Spec.Endpoint, signedData.Spec.Endpoint)
+	}
+	if l.Spec.ReplicatedProxyDomain != signedData.Spec.ReplicatedProxyDomain {
+		return errors.Errorf(`"replicatedProxyDomain" field has changed to %q (license) from %q (within signature)`, l.Spec.ReplicatedProxyDomain, signedData.Spec.ReplicatedProxyDomain)
+	}
+	if l.Spec.CustomerName != signedData.Spec.CustomerName {
+		return errors.Errorf(`"customerName" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerName, signedData.Spec.CustomerName)
+	}
+	if l.Spec.CustomerEmail != signedData.Spec.CustomerEmail {
+		return errors.Errorf(`"customerEmail" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerEmail, signedData.Spec.CustomerEmail)
+	}
+	if l.Spec.ChannelID != signedData.Spec.ChannelID {
+		return errors.Errorf(`"channelID" field has changed to %q (license) from %q (within signature)`, l.Spec.ChannelID, signedData.Spec.ChannelID)
+	}
+	if l.Spec.ChannelName != signedData.Spec.ChannelName {
+		return errors.Errorf(`"channelName" field has changed to %q (license) from %q (within signature)`, l.Spec.ChannelName, signedData.Spec.ChannelName)
+	}
+	if l.Spec.LicenseSequence != signedData.Spec.LicenseSequence {
+		return errors.Errorf(`"licenseSequence" field has changed to %d (license) from %d (within signature)`, l.Spec.LicenseSequence, signedData.Spec.LicenseSequence)
+	}
+	if l.Spec.LicenseID != signedData.Spec.LicenseID {
+		return errors.Errorf(`"licenseID" field has changed to %q (license) from %q (within signature)`, l.Spec.LicenseID, signedData.Spec.LicenseID)
+	}
+	if l.Spec.LicenseType != signedData.Spec.LicenseType {
+		return errors.Errorf(`"licenseType" field has changed to %q (license) from %q (within signature)`, l.Spec.LicenseType, signedData.Spec.LicenseType)
+	}
+	if l.Spec.IsAirgapSupported != signedData.Spec.IsAirgapSupported {
+		return errors.Errorf(`"isAirgapSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsAirgapSupported, signedData.Spec.IsAirgapSupported)
+	}
+	if l.Spec.IsGitOpsSupported != signedData.Spec.IsGitOpsSupported {
+		return errors.Errorf(`"isGitOpsSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsGitOpsSupported, signedData.Spec.IsGitOpsSupported)
+	}
+	if l.Spec.IsIdentityServiceSupported != signedData.Spec.IsIdentityServiceSupported {
+		return errors.Errorf(`"isIdentityServiceSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsIdentityServiceSupported, signedData.Spec.IsIdentityServiceSupported)
+	}
+	if l.Spec.IsGeoaxisSupported != signedData.Spec.IsGeoaxisSupported {
+		return errors.Errorf(`"isGeoaxisSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsGeoaxisSupported, signedData.Spec.IsGeoaxisSupported)
+	}
+	if l.Spec.IsSnapshotSupported != signedData.Spec.IsSnapshotSupported {
+		return errors.Errorf(`"isSnapshotSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSnapshotSupported, signedData.Spec.IsSnapshotSupported)
+	}
+	if l.Spec.IsDisasterRecoverySupported != signedData.Spec.IsDisasterRecoverySupported {
+		return errors.Errorf(`"isDisasterRecoverySupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsDisasterRecoverySupported, signedData.Spec.IsDisasterRecoverySupported)
+	}
+	if l.Spec.IsSupportBundleUploadSupported != signedData.Spec.IsSupportBundleUploadSupported {
+		return errors.Errorf(`"isSupportBundleUploadSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSupportBundleUploadSupported, signedData.Spec.IsSupportBundleUploadSupported)
+	}
+	if l.Spec.IsSemverRequired != signedData.Spec.IsSemverRequired {
+		return errors.Errorf(`"isSemverRequired" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSemverRequired, signedData.Spec.IsSemverRequired)
+	}
+	if l.Spec.IsEmbeddedClusterDownloadEnabled != signedData.Spec.IsEmbeddedClusterDownloadEnabled {
+		return errors.Errorf(`"isEmbeddedClusterDownloadEnabled" field has changed to %t (license) from %t (within signature)`, l.Spec.IsEmbeddedClusterDownloadEnabled, signedData.Spec.IsEmbeddedClusterDownloadEnabled)
+	}
+	if l.Spec.IsEmbeddedClusterMultiNodeEnabled != signedData.Spec.IsEmbeddedClusterMultiNodeEnabled {
+		return errors.Errorf(`"isEmbeddedClusterMultiNodeEnabled" field has changed to %t (license) from %t (within signature)`, l.Spec.IsEmbeddedClusterMultiNodeEnabled, signedData.Spec.IsEmbeddedClusterMultiNodeEnabled)
+	}
+
+	// Compare channels (order matters for slices)
+	if len(l.Spec.Channels) != len(signedData.Spec.Channels) {
+		return errors.Errorf(`"channels" length has changed to %d (license) from %d (within signature)`, len(l.Spec.Channels), len(signedData.Spec.Channels))
+	}
+	for i, channel := range l.Spec.Channels {
+		if channel.ChannelID != signedData.Spec.Channels[i].ChannelID {
+			return errors.Errorf(`"channels[%d].channelID" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelID, signedData.Spec.Channels[i].ChannelID)
+		}
+		if channel.ChannelName != signedData.Spec.Channels[i].ChannelName {
+			return errors.Errorf(`"channels[%d].channelName" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelName, signedData.Spec.Channels[i].ChannelName)
+		}
+		if channel.ChannelSlug != signedData.Spec.Channels[i].ChannelSlug {
+			return errors.Errorf(`"channels[%d].channelSlug" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelSlug, signedData.Spec.Channels[i].ChannelSlug)
+		}
+		if channel.IsDefault != signedData.Spec.Channels[i].IsDefault {
+			return errors.Errorf(`"channels[%d].isDefault" field has changed to %t (license) from %t (within signature)`, i, channel.IsDefault, signedData.Spec.Channels[i].IsDefault)
+		}
+		if channel.Endpoint != signedData.Spec.Channels[i].Endpoint {
+			return errors.Errorf(`"channels[%d].endpoint" field has changed to %q (license) from %q (within signature)`, i, channel.Endpoint, signedData.Spec.Channels[i].Endpoint)
+		}
+		if channel.ReplicatedProxyDomain != signedData.Spec.Channels[i].ReplicatedProxyDomain {
+			return errors.Errorf(`"channels[%d].replicatedProxyDomain" field has changed to %q (license) from %q (within signature)`, i, channel.ReplicatedProxyDomain, signedData.Spec.Channels[i].ReplicatedProxyDomain)
+		}
+		if channel.IsSemverRequired != signedData.Spec.Channels[i].IsSemverRequired {
+			return errors.Errorf(`"channels[%d].isSemverRequired" field has changed to %t (license) from %t (within signature)`, i, channel.IsSemverRequired, signedData.Spec.Channels[i].IsSemverRequired)
+		}
+	}
+
+	// Compare entitlements (order doesn't matter for maps)
+	if len(l.Spec.Entitlements) != len(signedData.Spec.Entitlements) {
+		return errors.Errorf(`"entitlements" length has changed to %d (license) from %d (within signature)`, len(l.Spec.Entitlements), len(signedData.Spec.Entitlements))
+	}
+	for fieldName, field := range l.Spec.Entitlements {
+		signedField, exists := signedData.Spec.Entitlements[fieldName]
+		if !exists {
+			return errors.Errorf(`"entitlements[%s]" field not found within signature`, fieldName)
+		}
+		if field.Title != signedField.Title {
+			return errors.Errorf(`"entitlements[%s].title" field has changed to %q (license) from %q (within signature)`, fieldName, field.Title, signedField.Title)
+		}
+		if field.Description != signedField.Description {
+			return errors.Errorf(`"entitlements[%s].description" field has changed to %q (license) from %q (within signature)`, fieldName, field.Description, signedField.Description)
+		}
+		if field.ValueType != signedField.ValueType {
+			return errors.Errorf(`"entitlements[%s].valueType" field has changed to %q (license) from %q (within signature)`, fieldName, field.ValueType, signedField.ValueType)
+		}
+		if field.IsHidden != signedField.IsHidden {
+			return errors.Errorf(`"entitlements[%s].isHidden" field has changed to %t (license) from %t (within signature)`, fieldName, field.IsHidden, signedField.IsHidden)
+		}
+		if field.Value.Type != signedField.Value.Type {
+			return errors.Errorf(`"entitlements[%s].value.type" field has changed to %d (license) from %d (within signature)`, fieldName, field.Value.Type, signedField.Value.Type)
+		}
+		if field.Value.Value() != signedField.Value.Value() {
+			return errors.Errorf(`"entitlements[%s].value" field has changed to %v (license) from %v (within signature)`, fieldName, field.Value.Value(), signedField.Value.Value())
+		}
+	}
+
+	return nil
 }
