@@ -111,7 +111,7 @@ type Channel struct {
 
 // LicenseSpec defines the desired state of LicenseSpec for v1beta2
 type LicenseSpec struct {
-	Signature256                      []byte                      `json:"signature256"` // SHA-256 signature
+	Signature                         []byte                      `json:"signature"` // SHA-256 signature
 	AppSlug                           string                      `json:"appSlug"`
 	Endpoint                          string                      `json:"endpoint,omitempty"`
 	ReplicatedProxyDomain             string                      `json:"replicatedProxyDomain,omitempty"`

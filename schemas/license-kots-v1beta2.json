@@ -19,7 +19,7 @@
       "required": [
         "appSlug",
         "licenseID",
-        "signature256"
+        "signature"
       ],
       "properties": {
         "appSlug": {
@@ -147,7 +147,7 @@
         "replicatedProxyDomain": {
           "type": "string"
         },
-        "signature256": {
+        "signature": {
           "type": "string",
           "format": "byte"
         }
