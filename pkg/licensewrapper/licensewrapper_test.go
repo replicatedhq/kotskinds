@@ -346,9 +346,8 @@ func TestLicenseWrapper_NewMethods_V1Beta1(t *testing.T) {
 	// GetReplicatedProxyDomain
 	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
 
-	// GetV1Channels
-	assert.Nil(t, wrapper.GetV1Channels()) // Not in test fixture
-	assert.Nil(t, wrapper.GetV2Channels()) // Should be nil for v1beta1
+	// GetChannels
+	assert.Nil(t, wrapper.GetChannels()) // Not in test fixture
 
 	// IsDisasterRecoverySupported
 	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
@@ -359,9 +358,8 @@ func TestLicenseWrapper_NewMethods_V1Beta1(t *testing.T) {
 	// IsEmbeddedClusterMultiNodeEnabled
 	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
 
-	// GetV1Entitlements - not in test fixture
-	assert.Nil(t, wrapper.GetV1Entitlements())
-	assert.Nil(t, wrapper.GetV2Entitlements()) // Should be nil for v1beta1
+	// GetEntitlements - not in test fixture
+	assert.Nil(t, wrapper.GetEntitlements())
 }
 
 func TestLicenseWrapper_NewMethods_V1Beta2(t *testing.T) {
@@ -378,9 +376,10 @@ func TestLicenseWrapper_NewMethods_V1Beta2(t *testing.T) {
 	// GetReplicatedProxyDomain
 	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
 
-	// GetV2Channels
-	assert.Nil(t, wrapper.GetV2Channels()) // Not in test fixture
-	assert.Nil(t, wrapper.GetV1Channels()) // Should be nil for v1beta2
+	// GetChannels - v1beta2 has empty channels array
+	channels := wrapper.GetChannels()
+	assert.NotNil(t, channels)
+	assert.Empty(t, channels)
 
 	// IsDisasterRecoverySupported
 	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
@@ -391,9 +390,8 @@ func TestLicenseWrapper_NewMethods_V1Beta2(t *testing.T) {
 	// IsEmbeddedClusterMultiNodeEnabled
 	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
 
-	// GetV2Entitlements - not in test fixture
-	assert.Nil(t, wrapper.GetV2Entitlements())
-	assert.Nil(t, wrapper.GetV1Entitlements()) // Should be nil for v1beta2
+	// GetEntitlements - not in test fixture
+	assert.Nil(t, wrapper.GetEntitlements())
 }
 
 func TestLicenseWrapper_EmptyWrapper_NewMethods(t *testing.T) {
@@ -406,16 +404,14 @@ func TestLicenseWrapper_EmptyWrapper_NewMethods(t *testing.T) {
 	// GetReplicatedProxyDomain
 	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain())
 
-	// GetV1Channels / GetV2Channels
-	assert.Nil(t, wrapper.GetV1Channels())
-	assert.Nil(t, wrapper.GetV2Channels())
+	// GetChannels
+	assert.Nil(t, wrapper.GetChannels())
 
 	// Boolean getters should return false
 	assert.False(t, wrapper.IsDisasterRecoverySupported())
 	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled())
 	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled())
 
-	// Entitlements
-	assert.Nil(t, wrapper.GetV1Entitlements())
-	assert.Nil(t, wrapper.GetV2Entitlements())
+	// GetEntitlements
+	assert.Nil(t, wrapper.GetEntitlements())
 }

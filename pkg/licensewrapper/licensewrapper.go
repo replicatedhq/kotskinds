@@ -12,6 +12,13 @@ type LicenseWrapper struct {
 	V2 *kotsv1beta2.License
 }
 
+// EntitlementFieldWrapper holds either a v1beta1 or v1beta2 EntitlementField (never both).
+// Exactly one field will be non-nil.
+type EntitlementFieldWrapper struct {
+	V1 *kotsv1beta1.EntitlementField
+	V2 *kotsv1beta2.EntitlementField
+}
+
 // IsV1 returns true if this wrapper contains a v1beta1 license
 func (w LicenseWrapper) IsV1() bool {
 	return w.V1 != nil
@@ -220,20 +227,27 @@ func (w LicenseWrapper) GetReplicatedProxyDomain() string {
 	return ""
 }
 
-// GetV1Channels returns the list of channels from v1beta1 license
-// Returns nil if this is not a v1beta1 license
-func (w LicenseWrapper) GetV1Channels() []kotsv1beta1.Channel {
+// GetChannels returns the list of channels from whichever version is present
+// Channel type is identical in both v1beta1 and v1beta2, so we return v1beta1.Channel
+func (w LicenseWrapper) GetChannels() []kotsv1beta1.Channel {
 	if w.V1 != nil {
 		return w.V1.Spec.Channels
 	}
-	return nil
-}
-
-// GetV2Channels returns the list of channels from v1beta2 license
-// Returns nil if this is not a v1beta2 license
-func (w LicenseWrapper) GetV2Channels() []kotsv1beta2.Channel {
 	if w.V2 != nil {
-		return w.V2.Spec.Channels
+		// Channel types are identical, safe to convert
+		channels := make([]kotsv1beta1.Channel, len(w.V2.Spec.Channels))
+		for i, ch := range w.V2.Spec.Channels {
+			channels[i] = kotsv1beta1.Channel{
+				ChannelID:             ch.ChannelID,
+				ChannelName:           ch.ChannelName,
+				ChannelSlug:           ch.ChannelSlug,
+				IsDefault:             ch.IsDefault,
+				Endpoint:              ch.Endpoint,
+				ReplicatedProxyDomain: ch.ReplicatedProxyDomain,
+				IsSemverRequired:      ch.IsSemverRequired,
+			}
+		}
+		return channels
 	}
 	return nil
 }
@@ -271,20 +285,106 @@ func (w LicenseWrapper) IsEmbeddedClusterMultiNodeEnabled() bool {
 	return false
 }
 
-// GetV1Entitlements returns the entitlements map from v1beta1 license
-// Returns nil if this is not a v1beta1 license
-func (w LicenseWrapper) GetV1Entitlements() map[string]kotsv1beta1.EntitlementField {
+// GetEntitlements returns the entitlements map from whichever version is present
+// Returns wrapped entitlements for version-agnostic access
+func (w LicenseWrapper) GetEntitlements() map[string]EntitlementFieldWrapper {
 	if w.V1 != nil {
-		return w.V1.Spec.Entitlements
+		if w.V1.Spec.Entitlements == nil {
+			return nil
+		}
+		wrapped := make(map[string]EntitlementFieldWrapper, len(w.V1.Spec.Entitlements))
+		for key, ent := range w.V1.Spec.Entitlements {
+			entCopy := ent
+			wrapped[key] = EntitlementFieldWrapper{V1: &entCopy}
+		}
+		return wrapped
+	}
+	if w.V2 != nil {
+		if w.V2.Spec.Entitlements == nil {
+			return nil
+		}
+		wrapped := make(map[string]EntitlementFieldWrapper, len(w.V2.Spec.Entitlements))
+		for key, ent := range w.V2.Spec.Entitlements {
+			entCopy := ent
+			wrapped[key] = EntitlementFieldWrapper{V2: &entCopy}
+		}
+		return wrapped
 	}
 	return nil
 }
 
-// GetV2Entitlements returns the entitlements map from v1beta2 license
-// Returns nil if this is not a v1beta2 license
-func (w LicenseWrapper) GetV2Entitlements() map[string]kotsv1beta2.EntitlementField {
+// EntitlementFieldWrapper accessor methods
+
+// GetTitle returns the entitlement title from whichever version is present
+func (w EntitlementFieldWrapper) GetTitle() string {
+	if w.V1 != nil {
+		return w.V1.Title
+	}
 	if w.V2 != nil {
-		return w.V2.Spec.Entitlements
+		return w.V2.Title
+	}
+	return ""
+}
+
+// GetDescription returns the entitlement description from whichever version is present
+func (w EntitlementFieldWrapper) GetDescription() string {
+	if w.V1 != nil {
+		return w.V1.Description
+	}
+	if w.V2 != nil {
+		return w.V2.Description
+	}
+	return ""
+}
+
+// GetValue returns the entitlement value from whichever version is present
+// EntitlementValue type is identical in both versions
+func (w EntitlementFieldWrapper) GetValue() kotsv1beta1.EntitlementValue {
+	if w.V1 != nil {
+		return w.V1.Value
+	}
+	if w.V2 != nil {
+		// Safe to cast since EntitlementValue is identical in both versions
+		return kotsv1beta1.EntitlementValue{
+			Type:    kotsv1beta1.Type(w.V2.Value.Type),
+			IntVal:  w.V2.Value.IntVal,
+			StrVal:  w.V2.Value.StrVal,
+			BoolVal: w.V2.Value.BoolVal,
+		}
+	}
+	return kotsv1beta1.EntitlementValue{}
+}
+
+// GetValueType returns the entitlement value type from whichever version is present
+func (w EntitlementFieldWrapper) GetValueType() string {
+	if w.V1 != nil {
+		return w.V1.ValueType
+	}
+	if w.V2 != nil {
+		return w.V2.ValueType
+	}
+	return ""
+}
+
+// IsHidden returns whether the entitlement is hidden from whichever version is present
+func (w EntitlementFieldWrapper) IsHidden() bool {
+	if w.V1 != nil {
+		return w.V1.IsHidden
+	}
+	if w.V2 != nil {
+		return w.V2.IsHidden
+	}
+	return false
+}
+
+// GetSignature returns the entitlement signature from whichever version is present
+// Abstracts the V1/V2 signature field difference
+func (w EntitlementFieldWrapper) GetSignature() []byte {
+	if w.V1 != nil {
+		return w.V1.Signature.V1
+	}
+	if w.V2 != nil {
+		return w.V2.Signature.V2
 	}
 	return nil
 }
