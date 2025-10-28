@@ -197,3 +197,94 @@ func (w LicenseWrapper) IsSemverRequired() bool {
 	}
 	return false
 }
+
+// GetSignature returns the license signature from whichever version is present
+func (w LicenseWrapper) GetSignature() []byte {
+	if w.V1 != nil {
+		return w.V1.Spec.Signature
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.Signature
+	}
+	return nil
+}
+
+// GetReplicatedProxyDomain returns the replicated proxy domain from whichever version is present
+func (w LicenseWrapper) GetReplicatedProxyDomain() string {
+	if w.V1 != nil {
+		return w.V1.Spec.ReplicatedProxyDomain
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.ReplicatedProxyDomain
+	}
+	return ""
+}
+
+// GetV1Channels returns the list of channels from v1beta1 license
+// Returns nil if this is not a v1beta1 license
+func (w LicenseWrapper) GetV1Channels() []kotsv1beta1.Channel {
+	if w.V1 != nil {
+		return w.V1.Spec.Channels
+	}
+	return nil
+}
+
+// GetV2Channels returns the list of channels from v1beta2 license
+// Returns nil if this is not a v1beta2 license
+func (w LicenseWrapper) GetV2Channels() []kotsv1beta2.Channel {
+	if w.V2 != nil {
+		return w.V2.Spec.Channels
+	}
+	return nil
+}
+
+// IsDisasterRecoverySupported returns whether disaster recovery is supported from whichever version is present
+func (w LicenseWrapper) IsDisasterRecoverySupported() bool {
+	if w.V1 != nil {
+		return w.V1.Spec.IsDisasterRecoverySupported
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.IsDisasterRecoverySupported
+	}
+	return false
+}
+
+// IsEmbeddedClusterDownloadEnabled returns whether embedded cluster download is enabled from whichever version is present
+func (w LicenseWrapper) IsEmbeddedClusterDownloadEnabled() bool {
+	if w.V1 != nil {
+		return w.V1.Spec.IsEmbeddedClusterDownloadEnabled
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.IsEmbeddedClusterDownloadEnabled
+	}
+	return false
+}
+
+// IsEmbeddedClusterMultiNodeEnabled returns whether embedded cluster multi-node is enabled from whichever version is present
+func (w LicenseWrapper) IsEmbeddedClusterMultiNodeEnabled() bool {
+	if w.V1 != nil {
+		return w.V1.Spec.IsEmbeddedClusterMultiNodeEnabled
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.IsEmbeddedClusterMultiNodeEnabled
+	}
+	return false
+}
+
+// GetV1Entitlements returns the entitlements map from v1beta1 license
+// Returns nil if this is not a v1beta1 license
+func (w LicenseWrapper) GetV1Entitlements() map[string]kotsv1beta1.EntitlementField {
+	if w.V1 != nil {
+		return w.V1.Spec.Entitlements
+	}
+	return nil
+}
+
+// GetV2Entitlements returns the entitlements map from v1beta2 license
+// Returns nil if this is not a v1beta2 license
+func (w LicenseWrapper) GetV2Entitlements() map[string]kotsv1beta2.EntitlementField {
+	if w.V2 != nil {
+		return w.V2.Spec.Entitlements
+	}
+	return nil
+}

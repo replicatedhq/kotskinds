@@ -334,3 +334,88 @@ func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
 		})
 	}
 }
+
+func TestLicenseWrapper_NewMethods_V1Beta1(t *testing.T) {
+	// Test the 10 new methods added for additional field access
+	wrapper, err := LoadLicenseFromBytes([]byte(v1beta1LicenseYAML))
+	require.NoError(t, err)
+
+	// GetSignature - v1beta1 test fixture doesn't have signature field
+	assert.Nil(t, wrapper.GetSignature())
+
+	// GetReplicatedProxyDomain
+	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
+
+	// GetV1Channels
+	assert.Nil(t, wrapper.GetV1Channels()) // Not in test fixture
+	assert.Nil(t, wrapper.GetV2Channels()) // Should be nil for v1beta1
+
+	// IsDisasterRecoverySupported
+	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
+
+	// IsEmbeddedClusterDownloadEnabled
+	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled()) // Not in test fixture
+
+	// IsEmbeddedClusterMultiNodeEnabled
+	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
+
+	// GetV1Entitlements - not in test fixture
+	assert.Nil(t, wrapper.GetV1Entitlements())
+	assert.Nil(t, wrapper.GetV2Entitlements()) // Should be nil for v1beta1
+}
+
+func TestLicenseWrapper_NewMethods_V1Beta2(t *testing.T) {
+	// Test the 10 new methods added for additional field access
+	wrapper, err := LoadLicenseFromBytes([]byte(v1beta2LicenseYAML))
+	require.NoError(t, err)
+
+	// GetSignature - signature is stored as []byte in the spec
+	signature := wrapper.GetSignature()
+	assert.NotNil(t, signature)
+	// The YAML parser interprets the base64 string as bytes
+	assert.True(t, len(signature) > 0)
+
+	// GetReplicatedProxyDomain
+	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
+
+	// GetV2Channels
+	assert.Nil(t, wrapper.GetV2Channels()) // Not in test fixture
+	assert.Nil(t, wrapper.GetV1Channels()) // Should be nil for v1beta2
+
+	// IsDisasterRecoverySupported
+	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
+
+	// IsEmbeddedClusterDownloadEnabled
+	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled()) // Not in test fixture
+
+	// IsEmbeddedClusterMultiNodeEnabled
+	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
+
+	// GetV2Entitlements - not in test fixture
+	assert.Nil(t, wrapper.GetV2Entitlements())
+	assert.Nil(t, wrapper.GetV1Entitlements()) // Should be nil for v1beta2
+}
+
+func TestLicenseWrapper_EmptyWrapper_NewMethods(t *testing.T) {
+	// Test behavior when wrapper is empty (both fields nil) for new methods
+	wrapper := LicenseWrapper{}
+
+	// GetSignature
+	assert.Nil(t, wrapper.GetSignature())
+
+	// GetReplicatedProxyDomain
+	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain())
+
+	// GetV1Channels / GetV2Channels
+	assert.Nil(t, wrapper.GetV1Channels())
+	assert.Nil(t, wrapper.GetV2Channels())
+
+	// Boolean getters should return false
+	assert.False(t, wrapper.IsDisasterRecoverySupported())
+	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled())
+	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled())
+
+	// Entitlements
+	assert.Nil(t, wrapper.GetV1Entitlements())
+	assert.Nil(t, wrapper.GetV2Entitlements())
+}
