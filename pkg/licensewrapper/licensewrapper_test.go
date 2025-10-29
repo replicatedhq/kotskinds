@@ -260,7 +260,7 @@ spec:
 }
 
 func TestLicenseWrapper_AllMethods_V1Beta1(t *testing.T) {
-	// Comprehensive test ensuring all 18 methods work for v1beta1
+	// Comprehensive test ensuring all methods work for v1beta1
 	wrapper, err := LoadLicenseFromBytes([]byte(v1beta1LicenseYAML))
 	require.NoError(t, err)
 
@@ -287,6 +287,11 @@ func TestLicenseWrapper_AllMethods_V1Beta1(t *testing.T) {
 		{"IsSnapshotSupported", func() interface{} { return wrapper.IsSnapshotSupported() }, true},
 		{"IsSupportBundleUploadSupported", func() interface{} { return wrapper.IsSupportBundleUploadSupported() }, true},
 		{"IsSemverRequired", func() interface{} { return wrapper.IsSemverRequired() }, true},
+		// New methods added for additional field access
+		{"GetReplicatedProxyDomain", func() interface{} { return wrapper.GetReplicatedProxyDomain() }, ""},
+		{"IsDisasterRecoverySupported", func() interface{} { return wrapper.IsDisasterRecoverySupported() }, false},
+		{"IsEmbeddedClusterDownloadEnabled", func() interface{} { return wrapper.IsEmbeddedClusterDownloadEnabled() }, false},
+		{"IsEmbeddedClusterMultiNodeEnabled", func() interface{} { return wrapper.IsEmbeddedClusterMultiNodeEnabled() }, false},
 	}
 
 	for _, m := range methods {
@@ -295,10 +300,23 @@ func TestLicenseWrapper_AllMethods_V1Beta1(t *testing.T) {
 			assert.Equal(t, m.expected, result)
 		})
 	}
+
+	// Typed nil values require assert.Nil instead of assert.Equal
+	t.Run("GetSignature", func(t *testing.T) {
+		assert.Nil(t, wrapper.GetSignature())
+	})
+
+	t.Run("GetChannels", func(t *testing.T) {
+		assert.Nil(t, wrapper.GetChannels())
+	})
+
+	t.Run("GetEntitlements", func(t *testing.T) {
+		assert.Nil(t, wrapper.GetEntitlements())
+	})
 }
 
 func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
-	// Comprehensive test ensuring all 18 methods work for v1beta2
+	// Comprehensive test ensuring all methods work for v1beta2
 	wrapper, err := LoadLicenseFromBytes([]byte(v1beta2LicenseYAML))
 	require.NoError(t, err)
 
@@ -325,6 +343,11 @@ func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
 		{"IsSnapshotSupported", func() interface{} { return wrapper.IsSnapshotSupported() }, true},
 		{"IsSupportBundleUploadSupported", func() interface{} { return wrapper.IsSupportBundleUploadSupported() }, true},
 		{"IsSemverRequired", func() interface{} { return wrapper.IsSemverRequired() }, true},
+		// New methods added for additional field access
+		{"GetReplicatedProxyDomain", func() interface{} { return wrapper.GetReplicatedProxyDomain() }, ""},
+		{"IsDisasterRecoverySupported", func() interface{} { return wrapper.IsDisasterRecoverySupported() }, false},
+		{"IsEmbeddedClusterDownloadEnabled", func() interface{} { return wrapper.IsEmbeddedClusterDownloadEnabled() }, false},
+		{"IsEmbeddedClusterMultiNodeEnabled", func() interface{} { return wrapper.IsEmbeddedClusterMultiNodeEnabled() }, false},
 	}
 
 	for _, m := range methods {
@@ -333,65 +356,23 @@ func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
 			assert.Equal(t, m.expected, result)
 		})
 	}
-}
 
-func TestLicenseWrapper_NewMethods_V1Beta1(t *testing.T) {
-	// Test the 10 new methods added for additional field access
-	wrapper, err := LoadLicenseFromBytes([]byte(v1beta1LicenseYAML))
-	require.NoError(t, err)
+	// Special cases that need custom assertions
+	t.Run("GetSignature", func(t *testing.T) {
+		signature := wrapper.GetSignature()
+		assert.NotNil(t, signature)
+		assert.True(t, len(signature) > 0)
+	})
 
-	// GetSignature - v1beta1 test fixture doesn't have signature field
-	assert.Nil(t, wrapper.GetSignature())
+	t.Run("GetChannels", func(t *testing.T) {
+		channels := wrapper.GetChannels()
+		assert.NotNil(t, channels)
+		assert.Empty(t, channels)
+	})
 
-	// GetReplicatedProxyDomain
-	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
-
-	// GetChannels
-	assert.Nil(t, wrapper.GetChannels()) // Not in test fixture
-
-	// IsDisasterRecoverySupported
-	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
-
-	// IsEmbeddedClusterDownloadEnabled
-	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled()) // Not in test fixture
-
-	// IsEmbeddedClusterMultiNodeEnabled
-	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
-
-	// GetEntitlements - not in test fixture
-	assert.Nil(t, wrapper.GetEntitlements())
-}
-
-func TestLicenseWrapper_NewMethods_V1Beta2(t *testing.T) {
-	// Test the 10 new methods added for additional field access
-	wrapper, err := LoadLicenseFromBytes([]byte(v1beta2LicenseYAML))
-	require.NoError(t, err)
-
-	// GetSignature - signature is stored as []byte in the spec
-	signature := wrapper.GetSignature()
-	assert.NotNil(t, signature)
-	// The YAML parser interprets the base64 string as bytes
-	assert.True(t, len(signature) > 0)
-
-	// GetReplicatedProxyDomain
-	assert.Equal(t, "", wrapper.GetReplicatedProxyDomain()) // Not in test fixture
-
-	// GetChannels - v1beta2 has empty channels array
-	channels := wrapper.GetChannels()
-	assert.NotNil(t, channels)
-	assert.Empty(t, channels)
-
-	// IsDisasterRecoverySupported
-	assert.False(t, wrapper.IsDisasterRecoverySupported()) // Not in test fixture
-
-	// IsEmbeddedClusterDownloadEnabled
-	assert.False(t, wrapper.IsEmbeddedClusterDownloadEnabled()) // Not in test fixture
-
-	// IsEmbeddedClusterMultiNodeEnabled
-	assert.False(t, wrapper.IsEmbeddedClusterMultiNodeEnabled()) // Not in test fixture
-
-	// GetEntitlements - not in test fixture
-	assert.Nil(t, wrapper.GetEntitlements())
+	t.Run("GetEntitlements", func(t *testing.T) {
+		assert.Nil(t, wrapper.GetEntitlements())
+	})
 }
 
 func TestLicenseWrapper_EmptyWrapper_NewMethods(t *testing.T) {
