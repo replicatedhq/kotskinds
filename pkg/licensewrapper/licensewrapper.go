@@ -19,13 +19,17 @@ type EntitlementFieldWrapper struct {
 	V2 *kotsv1beta2.EntitlementField
 }
 
+func (l *LicenseWrapper) IsEmpty() bool {
+	return l == nil || (l.V1 == nil && l.V2 == nil)
+}
+
 // IsV1 returns true if this wrapper contains a v1beta1 license
-func (w LicenseWrapper) IsV1() bool {
+func (w *LicenseWrapper) IsV1() bool {
 	return w.V1 != nil
 }
 
 // IsV2 returns true if this wrapper contains a v1beta2 license
-func (w LicenseWrapper) IsV2() bool {
+func (w *LicenseWrapper) IsV2() bool {
 	return w.V2 != nil
 }
 

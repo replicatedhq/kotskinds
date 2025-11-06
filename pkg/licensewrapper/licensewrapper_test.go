@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	kotsv1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
+	kotsv1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -395,4 +397,60 @@ func TestLicenseWrapper_EmptyWrapper_NewMethods(t *testing.T) {
 
 	// GetEntitlements
 	assert.Nil(t, wrapper.GetEntitlements())
+}
+
+func TestLicenseWrapper_IsEmpty(t *testing.T) {
+	tests := []struct {
+		name     string
+		wrapper  *LicenseWrapper
+		expected bool
+	}{
+		{
+			name:     "nil wrapper",
+			wrapper:  nil,
+			expected: true,
+		},
+		{
+			name:     "empty wrapper with both V1 and V2 nil",
+			wrapper:  &LicenseWrapper{},
+			expected: true,
+		},
+		{
+			name: "wrapper with V1 license",
+			wrapper: &LicenseWrapper{
+				V1: &kotsv1beta1.License{},
+			},
+			expected: false,
+		},
+		{
+			name: "wrapper with V2 license",
+			wrapper: &LicenseWrapper{
+				V2: &kotsv1beta2.License{},
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.wrapper.IsEmpty()
+			assert.Equal(t, tt.expected, result, "IsEmpty() returned unexpected value for %s", tt.name)
+		})
+	}
+}
+
+func TestLicenseWrapper_IsEmpty_WithLoadedLicenses(t *testing.T) {
+	// Test with actual loaded v1beta1 license
+	t.Run("loaded v1beta1 license is not empty", func(t *testing.T) {
+		wrapper, err := LoadLicenseFromBytes([]byte(v1beta1LicenseYAML))
+		require.NoError(t, err)
+		assert.False(t, wrapper.IsEmpty())
+	})
+
+	// Test with actual loaded v1beta2 license
+	t.Run("loaded v1beta2 license is not empty", func(t *testing.T) {
+		wrapper, err := LoadLicenseFromBytes([]byte(v1beta2LicenseYAML))
+		require.NoError(t, err)
+		assert.False(t, wrapper.IsEmpty())
+	})
 }
