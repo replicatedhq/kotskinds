@@ -29,6 +29,17 @@ func (w LicenseWrapper) IsV2() bool {
 	return w.V2 != nil
 }
 
+// GetVersion returns the version string ("v1beta1" or "v1beta2") from whichever version is present
+func (w LicenseWrapper) GetVersion() string {
+	if w.V1 != nil {
+		return "v1beta1"
+	}
+	if w.V2 != nil {
+		return "v1beta2"
+	}
+	return ""
+}
+
 // GetAppSlug returns the app slug from whichever version is present
 func (w LicenseWrapper) GetAppSlug() string {
 	if w.V1 != nil {

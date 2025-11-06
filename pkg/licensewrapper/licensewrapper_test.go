@@ -65,6 +65,7 @@ func TestLoadLicenseFromBytes_V1Beta1(t *testing.T) {
 	// Version detection
 	assert.True(t, wrapper.IsV1())
 	assert.False(t, wrapper.IsV2())
+	assert.Equal(t, "v1beta1", wrapper.GetVersion())
 
 	// Basic properties
 	assert.Equal(t, "test-license-id", wrapper.GetLicenseID())
@@ -94,6 +95,7 @@ func TestLoadLicenseFromBytes_V1Beta2(t *testing.T) {
 	// Version detection
 	assert.False(t, wrapper.IsV1())
 	assert.True(t, wrapper.IsV2())
+	assert.Equal(t, "v1beta2", wrapper.GetVersion())
 
 	// Basic properties
 	assert.Equal(t, "test-license-id", wrapper.GetLicenseID())
@@ -207,6 +209,7 @@ func TestLicenseWrapper_EmptyWrapper(t *testing.T) {
 	// Version checks
 	assert.False(t, wrapper.IsV1())
 	assert.False(t, wrapper.IsV2())
+	assert.Equal(t, "", wrapper.GetVersion())
 
 	// All getters should return zero values
 	assert.Equal(t, "", wrapper.GetAppSlug())
@@ -271,6 +274,7 @@ func TestLicenseWrapper_AllMethods_V1Beta1(t *testing.T) {
 	}{
 		{"IsV1", func() interface{} { return wrapper.IsV1() }, true},
 		{"IsV2", func() interface{} { return wrapper.IsV2() }, false},
+		{"GetVersion", func() interface{} { return wrapper.GetVersion() }, "v1beta1"},
 		{"GetAppSlug", func() interface{} { return wrapper.GetAppSlug() }, "test-app-slug"},
 		{"GetLicenseID", func() interface{} { return wrapper.GetLicenseID() }, "test-license-id"},
 		{"GetLicenseType", func() interface{} { return wrapper.GetLicenseType() }, "trial"},
@@ -327,6 +331,7 @@ func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
 	}{
 		{"IsV1", func() interface{} { return wrapper.IsV1() }, false},
 		{"IsV2", func() interface{} { return wrapper.IsV2() }, true},
+		{"GetVersion", func() interface{} { return wrapper.GetVersion() }, "v1beta2"},
 		{"GetAppSlug", func() interface{} { return wrapper.GetAppSlug() }, "test-app-slug"},
 		{"GetLicenseID", func() interface{} { return wrapper.GetLicenseID() }, "test-license-id"},
 		{"GetLicenseType", func() interface{} { return wrapper.GetLicenseType() }, "trial"},
