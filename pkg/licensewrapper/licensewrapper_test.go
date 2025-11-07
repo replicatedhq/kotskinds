@@ -454,3 +454,55 @@ func TestLicenseWrapper_IsEmpty_WithLoadedLicenses(t *testing.T) {
 		assert.False(t, wrapper.IsEmpty())
 	})
 }
+
+func TestLicenseWrapper_VerifySignature(t *testing.T) {
+	tests := []struct {
+		name        string
+		wrapper     *LicenseWrapper
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "nil wrapper returns error",
+			wrapper:     nil,
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name:        "empty wrapper returns error",
+			wrapper:     &LicenseWrapper{},
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name: "wrapper with V1 license but no signature returns error",
+			wrapper: &LicenseWrapper{
+				V1: &kotsv1beta1.License{},
+			},
+			expectError: true,
+			// Error will come from ValidateLicense, not our wrapper
+		},
+		{
+			name: "wrapper with V2 license but no signature returns error",
+			wrapper: &LicenseWrapper{
+				V2: &kotsv1beta2.License{},
+			},
+			expectError: true,
+			// Error will come from ValidateLicense, not our wrapper
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.wrapper.VerifySignature()
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
