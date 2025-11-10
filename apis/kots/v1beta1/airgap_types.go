@@ -32,6 +32,7 @@ type AirgapSpec struct {
 	SavedImages              []string                  `json:"savedImages,omitempty"`
 	EmbeddedClusterArtifacts *EmbeddedClusterArtifacts `json:"embeddedClusterArtifacts,omitempty"`
 	UncompressedSize         int64                     `json:"uncompressedSize,omitempty"`
+	Architecture             string                    `json:"architecture,omitempty"`
 	Format                   string                    `json:"format,omitempty"`
 	ReplicatedChartNames     []string                  `json:"replicatedChartNames,omitempty"`
 }
