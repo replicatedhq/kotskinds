@@ -20,6 +20,9 @@
         "appSlug": {
           "type": "string"
         },
+        "architecture": {
+          "type": "string"
+        },
         "channelID": {
           "type": "string"
         },
