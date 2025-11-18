@@ -41,9 +41,19 @@ type EntitlementValue struct {
 	IntVal  int64  `json:"-"`
 	StrVal  string `json:"-"`
 	BoolVal bool   `json:"-"`
+	// wasSet tracks whether UnmarshalJSON was called (value key present in YAML)
+	// This distinguishes between missing value (should be nil) vs explicit zero value
+	wasSet bool `json:"-"`
 }
 
 func (entitlementValue *EntitlementValue) Value() interface{} {
+	// When value field was not present in YAML (wasSet=false), return nil
+	// to match the pre-consolidation behavior. This produces "<nil>" via fmt.Sprint()
+	// and allows us to veriffy the signature
+	if !entitlementValue.wasSet {
+		return nil
+	}
+
 	if entitlementValue.Type == Int {
 		return entitlementValue.IntVal
 	} else if entitlementValue.Type == Bool {
@@ -70,6 +80,9 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 }
 
 func (entitlementValue *EntitlementValue) UnmarshalJSON(value []byte) error {
+	// Mark that the value field was present in JSON
+	entitlementValue.wasSet = true
+
 	if value[0] == '"' {
 		entitlementValue.Type = String
 		return json.Unmarshal(value, &entitlementValue.StrVal)

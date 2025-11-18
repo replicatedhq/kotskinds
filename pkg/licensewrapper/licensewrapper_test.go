@@ -1,6 +1,7 @@
 package licensewrapper
 
 import (
+	_ "embed"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,6 +11,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+//go:embed testdata/v1beta1.yaml
+var testdataV1Beta1 []byte
+
+//go:embed testdata/v1beta2.yaml
+var testdataV1Beta2 []byte
+
+//go:embed testdata/missing-values.yaml
+var testdataMissingValues []byte
+
+//go:embed testdata/blank-values.yaml
+var testdataBlankValues []byte
 
 const (
 	v1beta1LicenseYAML = `apiVersion: kots.io/v1beta1
@@ -502,6 +515,56 @@ func TestLicenseWrapper_VerifySignature(t *testing.T) {
 				}
 			} else {
 				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestLicenseWrapper_VerifySignature_WithTestData(t *testing.T) {
+	tests := []struct {
+		name        string
+		filePath    string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "v1beta1 license with valid signatures",
+			filePath:    "testdata/v1beta1.yaml",
+			expectError: false,
+		},
+		{
+			name:        "v1beta2 license with valid signatures",
+			filePath:    "testdata/v1beta2.yaml",
+			expectError: false,
+		},
+		{
+			name:        "license with missing entitlement field values",
+			filePath:    "testdata/missing-values.yaml",
+			expectError: false,
+		},
+		{
+			name:        "license with blank entitlement field values",
+			filePath:    "testdata/blank-values.yaml",
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Load the license from testdata
+			wrapper, err := LoadLicenseFromPath(tt.filePath)
+			require.NoError(t, err, "failed to load license from %s", tt.filePath)
+
+			// Verify the signature
+			err = wrapper.VerifySignature()
+
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err, "signature verification failed for %s", tt.filePath)
 			}
 		})
 	}
