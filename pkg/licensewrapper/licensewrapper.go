@@ -347,20 +347,14 @@ func (w EntitlementFieldWrapper) GetDescription() string {
 
 // GetValue returns the entitlement value from whichever version is present
 // EntitlementValue type is identical in both versions
-func (w EntitlementFieldWrapper) GetValue() kotsv1beta1.EntitlementValue {
+func (w EntitlementFieldWrapper) GetValue() interface{} {
 	if w.V1 != nil {
-		return w.V1.Value
+		return w.V1.Value.Value()
 	}
 	if w.V2 != nil {
-		// Safe to cast since EntitlementValue is identical in both versions
-		return kotsv1beta1.EntitlementValue{
-			Type:    kotsv1beta1.Type(w.V2.Value.Type),
-			IntVal:  w.V2.Value.IntVal,
-			StrVal:  w.V2.Value.StrVal,
-			BoolVal: w.V2.Value.BoolVal,
-		}
+		return w.V2.Value.Value()
 	}
-	return kotsv1beta1.EntitlementValue{}
+	return nil
 }
 
 // GetValueType returns the entitlement value type from whichever version is present
