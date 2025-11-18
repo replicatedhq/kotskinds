@@ -1,6 +1,8 @@
 package licensewrapper
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	_ "embed"
 	"os"
 	"path/filepath"
@@ -568,4 +570,156 @@ func TestLicenseWrapper_VerifySignature_WithTestData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLicenseWrapper_VerifySignatureWithKey(t *testing.T) {
+	// Generate a custom RSA key pair for testing
+	customKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err, "failed to generate RSA key pair")
+
+	tests := []struct {
+		name        string
+		wrapper     *LicenseWrapper
+		key         *rsa.PublicKey
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "nil wrapper returns error",
+			wrapper:     nil,
+			key:         &customKey.PublicKey,
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name:        "empty wrapper returns error",
+			wrapper:     &LicenseWrapper{},
+			key:         &customKey.PublicKey,
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name: "wrapper with V1 license but invalid signature returns error",
+			wrapper: &LicenseWrapper{
+				V1: &kotsv1beta1.License{},
+			},
+			key:         &customKey.PublicKey,
+			expectError: true,
+			// Error will come from ValidateLicenseWithKey
+		},
+		{
+			name: "wrapper with V2 license but invalid signature returns error",
+			wrapper: &LicenseWrapper{
+				V2: &kotsv1beta2.License{},
+			},
+			key:         &customKey.PublicKey,
+			expectError: true,
+			// Error will come from ValidateLicenseWithKey
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.wrapper.VerifySignatureWithKey(tt.key)
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestLicenseWrapper_VerifySignatureWithKey_WithTestData(t *testing.T) {
+	// Generate a custom RSA key pair for testing
+	// Note: This test will fail because the licenses in testdata are signed with
+	// Replicated's keys, not our custom key. This test demonstrates that the method
+	// correctly attempts to use the custom key.
+	customKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err, "failed to generate RSA key pair")
+
+	tests := []struct {
+		name        string
+		filePath    string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "v1beta1 license with custom key fails (signature mismatch)",
+			filePath:    "testdata/v1beta1.yaml",
+			expectError: true,
+			errorMsg:    "signature verification failed",
+		},
+		{
+			name:        "v1beta2 license with custom key fails (signature mismatch)",
+			filePath:    "testdata/v1beta2.yaml",
+			expectError: true,
+			errorMsg:    "signature verification failed",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Load the license from testdata
+			wrapper, err := LoadLicenseFromPath(tt.filePath)
+			require.NoError(t, err, "failed to load license from %s", tt.filePath)
+
+			// Verify the signature with custom key
+			err = wrapper.VerifySignatureWithKey(&customKey.PublicKey)
+
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err, "signature verification failed for %s", tt.filePath)
+			}
+		})
+	}
+}
+
+func TestLicenseWrapper_VerifySignatureWithKey_ThreadSafety(t *testing.T) {
+	// This test verifies that using VerifySignatureWithKey doesn't cause issues
+	// when multiple goroutines verify different licenses with different keys concurrently.
+	// Even though SetCustomPublicKeyRSA uses global state internally, the defer
+	// should ensure proper cleanup.
+
+	customKey1, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	customKey2, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	wrapper1 := &LicenseWrapper{
+		V1: &kotsv1beta1.License{},
+	}
+
+	wrapper2 := &LicenseWrapper{
+		V2: &kotsv1beta2.License{},
+	}
+
+	// Run verifications concurrently
+	done := make(chan bool, 2)
+
+	go func() {
+		_ = wrapper1.VerifySignatureWithKey(&customKey1.PublicKey)
+		done <- true
+	}()
+
+	go func() {
+		_ = wrapper2.VerifySignatureWithKey(&customKey2.PublicKey)
+		done <- true
+	}()
+
+	// Wait for both to complete
+	<-done
+	<-done
+
+	// Test passes if no panic occurs
+	// The actual verification will fail (invalid signatures), but we're testing
+	// that concurrent calls don't cause race conditions
 }

@@ -1,6 +1,8 @@
 package licensewrapper
 
 import (
+	"crypto/rsa"
+
 	"github.com/pkg/errors"
 
 	kotsv1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
@@ -409,6 +411,27 @@ func (w *LicenseWrapper) VerifySignature() error {
 
 	if w.V2 != nil {
 		_, err := w.V2.ValidateLicense()
+		return err
+	}
+
+	return errors.New("license wrapper has no version populated")
+}
+
+// VerifySignatureWithKey validates the license signature using a custom RSA public key
+// instead of the default global public keys. This is useful when you have custom key material
+// for verification. Returns an error if the wrapper is empty or if signature validation fails.
+func (w *LicenseWrapper) VerifySignatureWithKey(customKey *rsa.PublicKey) error {
+	if w.IsEmpty() {
+		return errors.New("license wrapper is empty")
+	}
+
+	if w.V1 != nil {
+		_, err := w.V1.ValidateLicenseWithKey(customKey)
+		return err
+	}
+
+	if w.V2 != nil {
+		_, err := w.V2.ValidateLicenseWithKey(customKey)
 		return err
 	}
 
