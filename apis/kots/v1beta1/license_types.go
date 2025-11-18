@@ -44,16 +44,17 @@ type EntitlementValue struct {
 	IntVal  int64  `json:"-"`
 	StrVal  string `json:"-"`
 	BoolVal bool   `json:"-"`
-	// wasSet tracks whether UnmarshalJSON was called (value key present in YAML)
-	// This distinguishes between missing value (should be nil) vs explicit zero value
-	wasSet bool `json:"-"`
+	// notSet tracks whether the value key was missing in YAML/JSON during unmarshaling.
+	// This distinguishes between missing value (should be nil) vs explicit zero value.
+	// Defaults to false, set to true when value key is absent.
+	notSet bool `json:"-"`
 }
 
 func (entitlementValue *EntitlementValue) Value() interface{} {
-	// When value field was not present in YAML (wasSet=false), return nil
+	// When value field was not present in YAML (notSet=true), return nil
 	// to match the pre-consolidation behavior. This produces "<nil>" via fmt.Sprint()
-	// and allows us to veriffy the signature
-	if !entitlementValue.wasSet {
+	// and allows us to verify the signature
+	if entitlementValue.notSet {
 		return nil
 	}
 
@@ -82,31 +83,6 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 	}
 }
 
-func (entitlementValue *EntitlementValue) UnmarshalJSON(value []byte) error {
-	// Mark that the value field was present in JSON
-	entitlementValue.wasSet = true
-
-	if value[0] == '"' {
-		entitlementValue.Type = String
-		return json.Unmarshal(value, &entitlementValue.StrVal)
-	}
-
-	intValue, err := strconv.ParseInt(string(value), 10, 64)
-	if err == nil {
-		entitlementValue.Type = Int
-		entitlementValue.IntVal = intValue
-		return nil
-	}
-
-	boolValue, err := strconv.ParseBool(string(value))
-	if err == nil {
-		entitlementValue.Type = Bool
-		entitlementValue.BoolVal = boolValue
-		return nil
-	}
-
-	return errors.New("unknown license value type")
-}
 
 type EntitlementField struct {
 	Title       string                    `json:"title,omitempty"`
@@ -115,6 +91,83 @@ type EntitlementField struct {
 	ValueType   string                    `json:"valueType,omitempty"`
 	IsHidden    bool                      `json:"isHidden,omitempty"`
 	Signature   EntitlementFieldSignature `json:"signature,omitempty"`
+}
+
+func (ef *EntitlementField) UnmarshalJSON(data []byte) error {
+	// Parse into a map to check for key presence
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	// Manually unmarshal each field except Value
+	if title, ok := raw["title"]; ok {
+		if err := json.Unmarshal(title, &ef.Title); err != nil {
+			return errors.Wrap(err, "failed to unmarshal title")
+		}
+	}
+	if description, ok := raw["description"]; ok {
+		if err := json.Unmarshal(description, &ef.Description); err != nil {
+			return errors.Wrap(err, "failed to unmarshal description")
+		}
+	}
+	if valueType, ok := raw["valueType"]; ok {
+		if err := json.Unmarshal(valueType, &ef.ValueType); err != nil {
+			return errors.Wrap(err, "failed to unmarshal valueType")
+		}
+	}
+	if isHidden, ok := raw["isHidden"]; ok {
+		if err := json.Unmarshal(isHidden, &ef.IsHidden); err != nil {
+			return errors.Wrap(err, "failed to unmarshal isHidden")
+		}
+	}
+	if signature, ok := raw["signature"]; ok {
+		if err := json.Unmarshal(signature, &ef.Signature); err != nil {
+			return errors.Wrap(err, "failed to unmarshal signature")
+		}
+	}
+
+	// Handle the Value field specially
+	if rawValue, hasValue := raw["value"]; hasValue {
+		// Value key is present, parse it manually
+		if err := unmarshalEntitlementValue(&ef.Value, rawValue); err != nil {
+			return errors.Wrap(err, "failed to unmarshal entitlement value")
+		}
+		// notSet stays false (default) since value was present
+	} else {
+		// Value key is missing, mark it as not set
+		ef.Value.notSet = true
+	}
+
+	return nil
+}
+
+// unmarshalEntitlementValue manually unmarshals a value into an EntitlementValue
+func unmarshalEntitlementValue(ev *EntitlementValue, data []byte) error {
+	// Try to detect the type and unmarshal accordingly
+	if len(data) > 0 && data[0] == '"' {
+		// String value
+		ev.Type = String
+		return json.Unmarshal(data, &ev.StrVal)
+	}
+
+	// Try integer
+	intValue, err := strconv.ParseInt(string(data), 10, 64)
+	if err == nil {
+		ev.Type = Int
+		ev.IntVal = intValue
+		return nil
+	}
+
+	// Try boolean
+	boolValue, err := strconv.ParseBool(string(data))
+	if err == nil {
+		ev.Type = Bool
+		ev.BoolVal = boolValue
+		return nil
+	}
+
+	return errors.New("unknown license value type")
 }
 
 type EntitlementFieldSignature struct {
