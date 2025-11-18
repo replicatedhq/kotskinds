@@ -96,7 +96,9 @@
                 "type": "string"
               },
               "value": {
-                "type": "object"
+                "description": "RawMessage is a raw encoded JSON value.\nIt implements [Marshaler] and [Unmarshaler] and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
+                "type": "string",
+                "format": "byte"
               },
               "valueType": {
                 "type": "string"
