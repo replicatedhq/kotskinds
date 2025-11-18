@@ -228,31 +228,6 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 	return appKeys, nil
 }
 
-// ValidateLicenseWithKey validates the entire v1beta2 license signature using a custom RSA public key
-// instead of the default global public keys. This is useful when you have custom key material for verification.
-// Returns the app signing keys on success (used for validating entitlement signatures), or an error if validation fails.
-func (l *License) ValidateLicenseWithKey(customKey *rsa.PublicKey) (*kotscrypto.AppSigningKeys, error) {
-	// Convert the RSA public key to PEM format for SetCustomPublicKeyRSA
-	pubKeyBytes, err := x509.MarshalPKIXPublicKey(customKey)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal custom public key")
-	}
-
-	pubKeyPEM := string(pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: pubKeyBytes,
-	}))
-
-	// Temporarily set the custom key for this validation
-	if err := kotscrypto.SetCustomPublicKeyRSA(pubKeyPEM); err != nil {
-		return nil, errors.Wrap(err, "failed to set custom public key")
-	}
-	defer kotscrypto.ResetCustomPublicKeyRSA()
-
-	// Use the standard validation logic with the custom key
-	return l.ValidateLicense()
-}
-
 // ValidateSignature validates a single v1beta2 entitlement signature
 func (e *EntitlementField) ValidateSignature(appKeys *kotscrypto.AppSigningKeys) error {
 	// Check if signature is present
