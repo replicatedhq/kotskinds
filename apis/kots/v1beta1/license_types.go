@@ -83,7 +83,6 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 	}
 }
 
-
 type EntitlementField struct {
 	Title       string                    `json:"title,omitempty"`
 	Description string                    `json:"description,omitempty"`
