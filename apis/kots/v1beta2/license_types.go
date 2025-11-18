@@ -88,6 +88,20 @@ func (entitlementValue *EntitlementValue) UnmarshalJSON(value []byte) error {
 	return errors.New("unknown license value type")
 }
 
+// MarshalYAML implements the yaml.Marshaller interface
+func (entitlementValue EntitlementValue) MarshalYAML() (interface{}, error) {
+	switch entitlementValue.Type {
+	case Int:
+		return entitlementValue.IntVal, nil
+	case String:
+		return entitlementValue.StrVal, nil
+	case Bool:
+		return entitlementValue.BoolVal, nil
+	default:
+		return nil, fmt.Errorf("impossible EntitlementValue.Type")
+	}
+}
+
 type EntitlementField struct {
 	Title       string                    `json:"title,omitempty"`
 	Description string                    `json:"description,omitempty"`
