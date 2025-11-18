@@ -1,9 +1,9 @@
-package v1beta1tests
+package v1beta2tests
 
 import (
 	"testing"
 
-	kotsv1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
+	kotsv1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
 	kotsscheme "github.com/replicatedhq/kotskinds/client/kotsclientset/scheme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
