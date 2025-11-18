@@ -1,8 +1,6 @@
 package licensewrapper
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	_ "embed"
 	"os"
 	"path/filepath"
@@ -525,37 +523,37 @@ func TestLicenseWrapper_VerifySignature(t *testing.T) {
 func TestLicenseWrapper_VerifySignature_WithTestData(t *testing.T) {
 	tests := []struct {
 		name        string
-		filePath    string
+		licenseData []byte
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name:        "v1beta1 license with valid signatures",
-			filePath:    "testdata/v1beta1.yaml",
+			licenseData: testdataV1Beta1,
 			expectError: false,
 		},
 		{
 			name:        "v1beta2 license with valid signatures",
-			filePath:    "testdata/v1beta2.yaml",
+			licenseData: testdataV1Beta2,
 			expectError: false,
 		},
 		{
 			name:        "license with missing entitlement field values",
-			filePath:    "testdata/missing-values.yaml",
+			licenseData: testdataMissingValues,
 			expectError: false,
 		},
 		{
 			name:        "license with blank entitlement field values",
-			filePath:    "testdata/blank-values.yaml",
+			licenseData: testdataBlankValues,
 			expectError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Load the license from testdata
-			wrapper, err := LoadLicenseFromPath(tt.filePath)
-			require.NoError(t, err, "failed to load license from %s", tt.filePath)
+			// Load the license from embedded testdata
+			wrapper, err := LoadLicenseFromBytes(tt.licenseData)
+			require.NoError(t, err, "failed to load license from embedded data")
 
 			// Verify the signature
 			err = wrapper.VerifySignature()
@@ -566,7 +564,7 @@ func TestLicenseWrapper_VerifySignature_WithTestData(t *testing.T) {
 					assert.Contains(t, err.Error(), tt.errorMsg)
 				}
 			} else {
-				require.NoError(t, err, "signature verification failed for %s", tt.filePath)
+				require.NoError(t, err, "signature verification failed for embedded data")
 			}
 		})
 	}
