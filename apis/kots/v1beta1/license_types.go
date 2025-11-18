@@ -83,49 +83,32 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 type EntitlementField struct {
 	Title       string                    `json:"title,omitempty"`
 	Description string                    `json:"description,omitempty"`
-	Value       EntitlementValue          `json:"value,omitempty"`
+	Value       EntitlementValue          `json:"-"`
+	ValueRaw    json.RawMessage           `json:"value,omitempty"`
 	ValueType   string                    `json:"valueType,omitempty"`
 	IsHidden    bool                      `json:"isHidden,omitempty"`
 	Signature   EntitlementFieldSignature `json:"signature,omitempty"`
 }
 
 func (ef *EntitlementField) UnmarshalJSON(data []byte) error {
-	// Parse into a map to check for key presence
+	// Define a type alias to prevent infinite recursion
+	type Alias EntitlementField
+
+	// Parse into a map to check for "value" key presence
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 
-	// Manually unmarshal each field except Value
-	if title, ok := raw["title"]; ok {
-		if err := json.Unmarshal(title, &ef.Title); err != nil {
-			return errors.Wrap(err, "failed to unmarshal title")
-		}
-	}
-	if description, ok := raw["description"]; ok {
-		if err := json.Unmarshal(description, &ef.Description); err != nil {
-			return errors.Wrap(err, "failed to unmarshal description")
-		}
-	}
-	if valueType, ok := raw["valueType"]; ok {
-		if err := json.Unmarshal(valueType, &ef.ValueType); err != nil {
-			return errors.Wrap(err, "failed to unmarshal valueType")
-		}
-	}
-	if isHidden, ok := raw["isHidden"]; ok {
-		if err := json.Unmarshal(isHidden, &ef.IsHidden); err != nil {
-			return errors.Wrap(err, "failed to unmarshal isHidden")
-		}
-	}
-	if signature, ok := raw["signature"]; ok {
-		if err := json.Unmarshal(signature, &ef.Signature); err != nil {
-			return errors.Wrap(err, "failed to unmarshal signature")
-		}
+	// Unmarshal all fields using default behavior
+	// This works because EntitlementValue has json:"-" on all fields,
+	// so the "value" field will be skipped by the default unmarshaler
+	if err := json.Unmarshal(data, (*Alias)(ef)); err != nil {
+		return err
 	}
 
 	// Handle the Value field specially
 	if rawValue, hasValue := raw["value"]; hasValue {
-		// Value key is present, parse it manually
 		if err := unmarshalEntitlementValue(&ef.Value, rawValue); err != nil {
 			return errors.Wrap(err, "failed to unmarshal entitlement value")
 		}
