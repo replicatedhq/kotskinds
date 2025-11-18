@@ -1,6 +1,8 @@
 package licensewrapper
 
 import (
+	"github.com/pkg/errors"
+
 	kotsv1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
 	kotsv1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
 )
@@ -343,20 +345,14 @@ func (w EntitlementFieldWrapper) GetDescription() string {
 
 // GetValue returns the entitlement value from whichever version is present
 // EntitlementValue type is identical in both versions
-func (w EntitlementFieldWrapper) GetValue() kotsv1beta1.EntitlementValue {
+func (w EntitlementFieldWrapper) GetValue() interface{} {
 	if w.V1 != nil {
-		return w.V1.Value
+		return w.V1.Value.Value()
 	}
 	if w.V2 != nil {
-		// Safe to cast since EntitlementValue is identical in both versions
-		return kotsv1beta1.EntitlementValue{
-			Type:    kotsv1beta1.Type(w.V2.Value.Type),
-			IntVal:  w.V2.Value.IntVal,
-			StrVal:  w.V2.Value.StrVal,
-			BoolVal: w.V2.Value.BoolVal,
-		}
+		return w.V2.Value.Value()
 	}
-	return kotsv1beta1.EntitlementValue{}
+	return nil
 }
 
 // GetValueType returns the entitlement value type from whichever version is present
@@ -391,4 +387,24 @@ func (w EntitlementFieldWrapper) GetSignature() []byte {
 		return w.V2.Signature.V2
 	}
 	return nil
+}
+
+// VerifySignature validates the license signature for whichever version (V1 or V2) is present.
+// Returns an error if the wrapper is empty or if signature validation fails.
+func (w *LicenseWrapper) VerifySignature() error {
+	if w.IsEmpty() {
+		return errors.New("license wrapper is empty")
+	}
+
+	if w.V1 != nil {
+		_, err := w.V1.ValidateLicense()
+		return err
+	}
+
+	if w.V2 != nil {
+		_, err := w.V2.ValidateLicense()
+		return err
+	}
+
+	return errors.New("license wrapper has no version populated")
 }

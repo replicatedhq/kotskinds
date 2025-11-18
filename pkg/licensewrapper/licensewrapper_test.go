@@ -1,6 +1,7 @@
 package licensewrapper
 
 import (
+	_ "embed"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,6 +11,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+//go:embed testdata/v1beta1.yaml
+var testdataV1Beta1 []byte
+
+//go:embed testdata/v1beta2.yaml
+var testdataV1Beta2 []byte
+
+//go:embed testdata/missing-values.yaml
+var testdataMissingValues []byte
+
+//go:embed testdata/blank-values.yaml
+var testdataBlankValues []byte
 
 const (
 	v1beta1LicenseYAML = `apiVersion: kots.io/v1beta1
@@ -453,4 +466,106 @@ func TestLicenseWrapper_IsEmpty_WithLoadedLicenses(t *testing.T) {
 		require.NoError(t, err)
 		assert.False(t, wrapper.IsEmpty())
 	})
+}
+
+func TestLicenseWrapper_VerifySignature(t *testing.T) {
+	tests := []struct {
+		name        string
+		wrapper     *LicenseWrapper
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "nil wrapper returns error",
+			wrapper:     nil,
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name:        "empty wrapper returns error",
+			wrapper:     &LicenseWrapper{},
+			expectError: true,
+			errorMsg:    "license wrapper is empty",
+		},
+		{
+			name: "wrapper with V1 license but no signature returns error",
+			wrapper: &LicenseWrapper{
+				V1: &kotsv1beta1.License{},
+			},
+			expectError: true,
+			// Error will come from ValidateLicense, not our wrapper
+		},
+		{
+			name: "wrapper with V2 license but no signature returns error",
+			wrapper: &LicenseWrapper{
+				V2: &kotsv1beta2.License{},
+			},
+			expectError: true,
+			// Error will come from ValidateLicense, not our wrapper
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.wrapper.VerifySignature()
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestLicenseWrapper_VerifySignature_WithTestData(t *testing.T) {
+	tests := []struct {
+		name        string
+		licenseData []byte
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "v1beta1 license with valid signatures",
+			licenseData: testdataV1Beta1,
+			expectError: false,
+		},
+		{
+			name:        "v1beta2 license with valid signatures",
+			licenseData: testdataV1Beta2,
+			expectError: false,
+		},
+		{
+			name:        "license with missing entitlement field values",
+			licenseData: testdataMissingValues,
+			expectError: false,
+		},
+		{
+			name:        "license with blank entitlement field values",
+			licenseData: testdataBlankValues,
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Load the license from embedded testdata
+			wrapper, err := LoadLicenseFromBytes(tt.licenseData)
+			require.NoError(t, err, "failed to load license from embedded data")
+
+			// Verify the signature
+			err = wrapper.VerifySignature()
+
+			if tt.expectError {
+				require.Error(t, err)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
+			} else {
+				require.NoError(t, err, "signature verification failed for embedded data")
+			}
+		})
+	}
 }

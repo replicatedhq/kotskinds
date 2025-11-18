@@ -21,6 +21,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"encoding/json"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -812,6 +813,11 @@ func (in *EmbeddedClusterRegistry) DeepCopy() *EmbeddedClusterRegistry {
 func (in *EntitlementField) DeepCopyInto(out *EntitlementField) {
 	*out = *in
 	out.Value = in.Value
+	if in.ValueRaw != nil {
+		in, out := &in.ValueRaw, &out.ValueRaw
+		*out = make(json.RawMessage, len(*in))
+		copy(*out, *in)
+	}
 	in.Signature.DeepCopyInto(&out.Signature)
 }
 
