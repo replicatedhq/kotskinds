@@ -121,6 +121,27 @@ func (ef *EntitlementField) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements custom JSON marshaling for EntitlementField.
+// This ensures that entitlement values are correctly marshaled whether the
+// license was loaded from YAML/JSON or created programmatically in code.
+func (ef EntitlementField) MarshalJSON() ([]byte, error) {
+	// Define a type alias to prevent infinite recursion
+	type Alias EntitlementField
+
+	// If the entitlement was created programmatically (ValueRaw not populated),
+	// marshal the Value field to ensure the "value" key appears in output
+	if len(ef.ValueRaw) == 0 && !ef.Value.notSet {
+		valueBytes, err := json.Marshal(ef.Value)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to marshal entitlement value")
+		}
+		ef.ValueRaw = valueBytes
+	}
+
+	// Use the alias type to marshal all fields with standard behavior
+	return json.Marshal((Alias)(ef))
+}
+
 // unmarshalEntitlementValue manually unmarshals a value into an EntitlementValue
 func unmarshalEntitlementValue(ev *EntitlementValue, data []byte) error {
 	// Try to detect the type and unmarshal accordingly

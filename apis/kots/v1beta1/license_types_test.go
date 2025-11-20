@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1_test
 
 import (
+	"bytes"
 	"testing"
 
 	kotsv1beta1 "github.com/replicatedhq/kotskinds/apis/kots/v1beta1"
@@ -132,4 +133,102 @@ spec:
 	ent.Value.IntVal = 33
 	err = ent.ValidateSignature(appKeys)
 	require.Error(t, err, "changing entitlement value should break signatures")
+}
+
+// TestProgrammaticEntitlementMarshaling tests that entitlement values are correctly
+// preserved when marshaling and unmarshaling licenses created programmatically.
+// This is a regression test ensuring programmatic license creation works as expected.
+func TestProgrammaticEntitlementMarshaling(t *testing.T) {
+	tests := []struct {
+		name          string
+		entitlement   kotsv1beta1.EntitlementField
+		expectedValue interface{}
+		valueType     string
+	}{
+		{
+			name: "string entitlement",
+			entitlement: kotsv1beta1.EntitlementField{
+				Title:       "Test String Field",
+				Description: "A test string entitlement",
+				Value: kotsv1beta1.EntitlementValue{
+					Type:   kotsv1beta1.String,
+					StrVal: "test-value",
+				},
+				ValueType: "String",
+			},
+			expectedValue: "test-value",
+			valueType:     "String",
+		},
+		{
+			name: "integer entitlement",
+			entitlement: kotsv1beta1.EntitlementField{
+				Title:       "Test Integer Field",
+				Description: "A test integer entitlement",
+				Value: kotsv1beta1.EntitlementValue{
+					Type:   kotsv1beta1.Int,
+					IntVal: 42,
+				},
+				ValueType: "Integer",
+			},
+			expectedValue: int64(42),
+			valueType:     "Integer",
+		},
+		{
+			name: "boolean entitlement",
+			entitlement: kotsv1beta1.EntitlementField{
+				Title:       "Test Boolean Field",
+				Description: "A test boolean entitlement",
+				Value: kotsv1beta1.EntitlementValue{
+					Type:    kotsv1beta1.Bool,
+					BoolVal: true,
+				},
+				ValueType: "Boolean",
+			},
+			expectedValue: true,
+			valueType:     "Boolean",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a license with a programmatically-created entitlement
+			license := &kotsv1beta1.License{
+				Spec: kotsv1beta1.LicenseSpec{
+					LicenseID: "test-license",
+					Entitlements: map[string]kotsv1beta1.EntitlementField{
+						"test-field": tt.entitlement,
+					},
+				},
+			}
+
+			// Marshal to YAML using the Kubernetes serializer
+			kotsscheme.AddToScheme(scheme.Scheme)
+			s := scheme.Codecs.LegacyCodec(kotsv1beta1.SchemeGroupVersion)
+			var buf bytes.Buffer
+			err := s.Encode(license, &buf)
+			require.NoError(t, err, "should be able to marshal programmatically-created license")
+			yamlBytes := buf.Bytes()
+
+			// Unmarshal back
+			decode := scheme.Codecs.UniversalDeserializer().Decode
+			obj, _, err := decode(yamlBytes, nil, nil)
+			require.NoError(t, err, "should be able to unmarshal back")
+
+			unmarshaled := obj.(*kotsv1beta1.License)
+			field, ok := unmarshaled.Spec.Entitlements["test-field"]
+			require.True(t, ok, "entitlement should exist after round-trip")
+
+			// Verify the value was preserved
+			assert.Equal(t, tt.entitlement.Title, field.Title, "title should be preserved")
+			assert.Equal(t, tt.entitlement.Description, field.Description, "description should be preserved")
+			assert.Equal(t, tt.entitlement.ValueType, field.ValueType, "value type should be preserved")
+
+			// Verify the actual value matches
+			actualValue := field.Value.Value()
+			assert.Equal(t, tt.expectedValue, actualValue, "value should be preserved through marshal/unmarshal")
+
+			// Verify the type is correct
+			assert.Equal(t, tt.entitlement.Value.Type, field.Value.Type, "entitlement type should be preserved")
+		})
+	}
 }
