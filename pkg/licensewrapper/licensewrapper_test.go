@@ -34,7 +34,7 @@ spec:
   appSlug: test-app-slug
   channelID: test-channel-id
   channelName: Stable
-	customerID: test-customer-id
+  customerID: test-customer-id
   customerName: Test Customer
   customerEmail: test@example.com
   endpoint: https://replicated.app
@@ -58,7 +58,7 @@ spec:
   appSlug: test-app-slug
   channelID: test-channel-id
   channelName: Stable
-	customerID: test-customer-id
+  customerID: test-customer-id
   customerName: Test Customer
   customerEmail: test@example.com
   endpoint: https://replicated.app
