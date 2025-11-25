@@ -101,6 +101,17 @@ func (w LicenseWrapper) GetChannelName() string {
 	return ""
 }
 
+// GetCustomerID returns the customer ID from whichever version is present
+func (w LicenseWrapper) GetCustomerID() string {
+	if w.V1 != nil {
+		return w.V1.Spec.CustomerID
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.CustomerID
+	}
+	return ""
+}
+
 // GetCustomerName returns the customer name from whichever version is present
 func (w LicenseWrapper) GetCustomerName() string {
 	if w.V1 != nil {
