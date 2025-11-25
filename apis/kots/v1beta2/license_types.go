@@ -117,6 +117,7 @@ type LicenseSpec struct {
 	AppSlug                           string                      `json:"appSlug"`
 	Endpoint                          string                      `json:"endpoint,omitempty"`
 	ReplicatedProxyDomain             string                      `json:"replicatedProxyDomain,omitempty"`
+	CustomerID                        string                      `json:"customerID,omitempty"`
 	CustomerName                      string                      `json:"customerName,omitempty"`
 	CustomerEmail                     string                      `json:"customerEmail,omitempty"`
 	ChannelID                         string                      `json:"channelID,omitempty"`
@@ -261,6 +262,9 @@ func (l *License) compareLicenseData(signedJSON []byte) error {
 	}
 	if l.Spec.ReplicatedProxyDomain != signedData.Spec.ReplicatedProxyDomain {
 		return errors.Errorf(`"replicatedProxyDomain" field has changed to %q (license) from %q (within signature)`, l.Spec.ReplicatedProxyDomain, signedData.Spec.ReplicatedProxyDomain)
+	}
+	if l.Spec.CustomerID != signedData.Spec.CustomerID {
+		return errors.Errorf(`"customerID" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerID, signedData.Spec.CustomerID)
 	}
 	if l.Spec.CustomerName != signedData.Spec.CustomerName {
 		return errors.Errorf(`"customerName" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerName, signedData.Spec.CustomerName)

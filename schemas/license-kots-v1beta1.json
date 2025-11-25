@@ -66,6 +66,9 @@
         "customerEmail": {
           "type": "string"
         },
+        "customerID": {
+          "type": "string"
+        },
         "customerName": {
           "type": "string"
         },
