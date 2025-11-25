@@ -34,6 +34,7 @@ spec:
   appSlug: test-app-slug
   channelID: test-channel-id
   channelName: Stable
+	customerID: test-customer-id
   customerName: Test Customer
   customerEmail: test@example.com
   endpoint: https://replicated.app
@@ -57,6 +58,7 @@ spec:
   appSlug: test-app-slug
   channelID: test-channel-id
   channelName: Stable
+	customerID: test-customer-id
   customerName: Test Customer
   customerEmail: test@example.com
   endpoint: https://replicated.app
@@ -86,6 +88,7 @@ func TestLoadLicenseFromBytes_V1Beta1(t *testing.T) {
 	assert.Equal(t, "test-app-slug", wrapper.GetAppSlug())
 	assert.Equal(t, "test-channel-id", wrapper.GetChannelID())
 	assert.Equal(t, "Stable", wrapper.GetChannelName())
+	assert.Equal(t, "test-customer-id", wrapper.GetCustomerID())
 	assert.Equal(t, "Test Customer", wrapper.GetCustomerName())
 	assert.Equal(t, "test@example.com", wrapper.GetCustomerEmail())
 	assert.Equal(t, "https://replicated.app", wrapper.GetEndpoint())
@@ -115,6 +118,7 @@ func TestLoadLicenseFromBytes_V1Beta2(t *testing.T) {
 	assert.Equal(t, "test-app-slug", wrapper.GetAppSlug())
 	assert.Equal(t, "test-channel-id", wrapper.GetChannelID())
 	assert.Equal(t, "Stable", wrapper.GetChannelName())
+	assert.Equal(t, "test-customer-id", wrapper.GetCustomerID())
 	assert.Equal(t, "Test Customer", wrapper.GetCustomerName())
 	assert.Equal(t, "test@example.com", wrapper.GetCustomerEmail())
 	assert.Equal(t, "https://replicated.app", wrapper.GetEndpoint())
@@ -230,6 +234,7 @@ func TestLicenseWrapper_EmptyWrapper(t *testing.T) {
 	assert.Equal(t, "", wrapper.GetEndpoint())
 	assert.Equal(t, "", wrapper.GetChannelID())
 	assert.Equal(t, "", wrapper.GetChannelName())
+	assert.Equal(t, "", wrapper.GetCustomerID())
 	assert.Equal(t, "", wrapper.GetCustomerName())
 	assert.Equal(t, "", wrapper.GetCustomerEmail())
 	assert.Equal(t, int64(0), wrapper.GetLicenseSequence())
@@ -292,6 +297,7 @@ func TestLicenseWrapper_AllMethods_V1Beta1(t *testing.T) {
 		{"GetEndpoint", func() interface{} { return wrapper.GetEndpoint() }, "https://replicated.app"},
 		{"GetChannelID", func() interface{} { return wrapper.GetChannelID() }, "test-channel-id"},
 		{"GetChannelName", func() interface{} { return wrapper.GetChannelName() }, "Stable"},
+		{"GetCustomerID", func() interface{} { return wrapper.GetCustomerID() }, "test-customer-id"},
 		{"GetCustomerName", func() interface{} { return wrapper.GetCustomerName() }, "Test Customer"},
 		{"GetCustomerEmail", func() interface{} { return wrapper.GetCustomerEmail() }, "test@example.com"},
 		{"GetLicenseSequence", func() interface{} { return wrapper.GetLicenseSequence() }, int64(2)},
@@ -348,6 +354,7 @@ func TestLicenseWrapper_AllMethods_V1Beta2(t *testing.T) {
 		{"GetEndpoint", func() interface{} { return wrapper.GetEndpoint() }, "https://replicated.app"},
 		{"GetChannelID", func() interface{} { return wrapper.GetChannelID() }, "test-channel-id"},
 		{"GetChannelName", func() interface{} { return wrapper.GetChannelName() }, "Stable"},
+		{"GetCustomerID", func() interface{} { return wrapper.GetCustomerID() }, "test-customer-id"},
 		{"GetCustomerName", func() interface{} { return wrapper.GetCustomerName() }, "Test Customer"},
 		{"GetCustomerEmail", func() interface{} { return wrapper.GetCustomerEmail() }, "test@example.com"},
 		{"GetLicenseSequence", func() interface{} { return wrapper.GetLicenseSequence() }, int64(2)},
