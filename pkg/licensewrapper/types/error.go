@@ -12,7 +12,7 @@ type LicenseDataValidationError struct {
 }
 
 func (e *LicenseDataValidationError) Error() string {
-	return fmt.Sprintf("license data validation error: %s field has changed to %q (license) from %q (within signature)", e.FieldName, e.ActualValue, e.SignedValue)
+	return fmt.Sprintf("%s field has changed to %q (license) from %q (within signature)", e.FieldName, e.ActualValue, e.SignedValue)
 }
 
 // return true if the error is a LicenseDataValidationError
