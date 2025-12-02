@@ -28,3 +28,24 @@ jobs:
 
     - name: Run schema checks
       run: make check-schemas
+
+    - name: run schema generation
+      run: make generate
+
+    - name: ensure no changes are present after generation
+      run: git diff --exit-code
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: check-schemas
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+
+    - name: Run tests
+      run: make test
