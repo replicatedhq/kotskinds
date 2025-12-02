@@ -7,6 +7,7 @@ import (
 	kotsv1beta2 "github.com/replicatedhq/kotskinds/apis/kots/v1beta2"
 	kotsscheme "github.com/replicatedhq/kotskinds/client/kotsclientset/scheme"
 	"github.com/replicatedhq/kotskinds/pkg/crypto"
+	"github.com/replicatedhq/kotskinds/pkg/licensewrapper/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -240,7 +241,6 @@ metadata:
 spec:
   licenseID: test-license-id
   licenseType: trial
-  customerID: test-customer-id
   customerName: Test Customer
   appSlug: test-app
   channelID: "1"
@@ -309,6 +309,10 @@ spec:
 	license.Spec.AppSlug = "changed"
 	_, err = license.ValidateLicense()
 	require.Error(t, err, "changing spec fields should invalidate the license")
+	var ldve *types.LicenseDataValidationError
+	require.ErrorAs(t, err, &ldve, "error should be a LicenseDataValidationError")
+	require.True(t, types.IsLicenseDataValidationError(err), "error should be a LicenseDataValidationError")
+	require.Equal(t, "test-app", license.Spec.AppSlug, "app slug should be returned to the signed value after validation")
 
 	// validate entitlement signatures
 	for k, val := range license.Spec.Entitlements {

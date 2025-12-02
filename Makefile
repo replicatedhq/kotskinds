@@ -37,6 +37,10 @@ schemas: fmt generate
 fmt:
 	go fmt ./...
 
+.PHONY: test
+test:
+	go test ./...
+
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))

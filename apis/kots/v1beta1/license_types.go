@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 
 	kotscrypto "github.com/replicatedhq/kotskinds/pkg/crypto"
+	"github.com/replicatedhq/kotskinds/pkg/licensewrapper/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -245,6 +246,7 @@ func init() {
 
 // ValidateLicense validates the entire v1beta1 license signature and all entitlement signatures
 // Returns the app signing keys on success (used for validating entitlement signatures), or an error if validation fails
+// if the plaintext license data is different than the signed data, the license object will be modified to ensure all fields are from the signed data, and an error will still be returned.
 func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 	// Decode and parse the signature
 	outerSig, innerSig, appKeys, err := kotscrypto.DecodeLicenseSignature(l.Spec.Signature)
@@ -319,6 +321,7 @@ func (in *EntitlementField) ValidateSignature(appKeys *kotscrypto.AppSigningKeys
 }
 
 // compareLicenseData decodes the provided license json (from a signature) and compares it to the license data in the calling license
+// this function modifies the calling license object to ensure all fields are from the signed data, not the outer unsigned yaml
 func (l *License) compareLicenseData(signedJSON []byte) error {
 	// Decode the license JSON
 	var signedData License
@@ -326,125 +329,279 @@ func (l *License) compareLicenseData(signedJSON []byte) error {
 		return errors.Wrap(err, "failed to unmarshal signed license data")
 	}
 
-	// Compare each field in l.Spec against the decoded license
-	if l.Spec.AppSlug != signedData.Spec.AppSlug {
-		return errors.Errorf(`"appSlug" field has changed to %q (license) from %q (within signature)`, l.Spec.AppSlug, signedData.Spec.AppSlug)
+	// ensure that the signature object is updated to the signed data
+	originalSignature := l.Spec.Signature
+	outerData := l.Spec.DeepCopy()
+	l.Spec = signedData.Spec
+	l.Spec.Signature = originalSignature
+
+	// Compare each field in outerData against the decoded license data
+	if outerData.AppSlug != signedData.Spec.AppSlug {
+		return &types.LicenseDataValidationError{
+			FieldName:   "appSlug",
+			SignedValue: signedData.Spec.AppSlug,
+			ActualValue: outerData.AppSlug,
+		}
 	}
-	if l.Spec.Endpoint != signedData.Spec.Endpoint {
-		return errors.Errorf(`"endpoint" field has changed to %q (license) from %q (within signature)`, l.Spec.Endpoint, signedData.Spec.Endpoint)
+	if outerData.Endpoint != signedData.Spec.Endpoint {
+		return &types.LicenseDataValidationError{
+			FieldName:   "endpoint",
+			SignedValue: signedData.Spec.Endpoint,
+			ActualValue: outerData.Endpoint,
+		}
 	}
-	if l.Spec.ReplicatedProxyDomain != signedData.Spec.ReplicatedProxyDomain {
-		return errors.Errorf(`"replicatedProxyDomain" field has changed to %q (license) from %q (within signature)`, l.Spec.ReplicatedProxyDomain, signedData.Spec.ReplicatedProxyDomain)
+	if outerData.ReplicatedProxyDomain != signedData.Spec.ReplicatedProxyDomain {
+		return &types.LicenseDataValidationError{
+			FieldName:   "replicatedProxyDomain",
+			SignedValue: signedData.Spec.ReplicatedProxyDomain,
+			ActualValue: outerData.ReplicatedProxyDomain,
+		}
 	}
-	if l.Spec.CustomerID != signedData.Spec.CustomerID {
-		return errors.Errorf(`"customerID" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerID, signedData.Spec.CustomerID)
+	if outerData.CustomerID != signedData.Spec.CustomerID {
+		return &types.LicenseDataValidationError{
+			FieldName:   "customerID",
+			SignedValue: signedData.Spec.CustomerID,
+			ActualValue: outerData.CustomerID,
+		}
 	}
-	if l.Spec.CustomerName != signedData.Spec.CustomerName {
-		return errors.Errorf(`"customerName" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerName, signedData.Spec.CustomerName)
+	if outerData.CustomerName != signedData.Spec.CustomerName {
+		return &types.LicenseDataValidationError{
+			FieldName:   "customerName",
+			SignedValue: signedData.Spec.CustomerName,
+			ActualValue: outerData.CustomerName,
+		}
 	}
-	if l.Spec.CustomerEmail != signedData.Spec.CustomerEmail {
-		return errors.Errorf(`"customerEmail" field has changed to %q (license) from %q (within signature)`, l.Spec.CustomerEmail, signedData.Spec.CustomerEmail)
+	if outerData.CustomerEmail != signedData.Spec.CustomerEmail {
+		return &types.LicenseDataValidationError{
+			FieldName:   "customerEmail",
+			SignedValue: signedData.Spec.CustomerEmail,
+			ActualValue: outerData.CustomerEmail,
+		}
 	}
-	if l.Spec.ChannelID != signedData.Spec.ChannelID {
-		return errors.Errorf(`"channelID" field has changed to %q (license) from %q (within signature)`, l.Spec.ChannelID, signedData.Spec.ChannelID)
+	if outerData.ChannelID != signedData.Spec.ChannelID {
+		return &types.LicenseDataValidationError{
+			FieldName:   "channelID",
+			SignedValue: signedData.Spec.ChannelID,
+			ActualValue: outerData.ChannelID,
+		}
 	}
-	if l.Spec.ChannelName != signedData.Spec.ChannelName {
-		return errors.Errorf(`"channelName" field has changed to %q (license) from %q (within signature)`, l.Spec.ChannelName, signedData.Spec.ChannelName)
+	if outerData.ChannelName != signedData.Spec.ChannelName {
+		return &types.LicenseDataValidationError{
+			FieldName:   "channelName",
+			SignedValue: signedData.Spec.ChannelName,
+			ActualValue: outerData.ChannelName,
+		}
 	}
-	if l.Spec.LicenseSequence != signedData.Spec.LicenseSequence {
-		return errors.Errorf(`"licenseSequence" field has changed to %d (license) from %d (within signature)`, l.Spec.LicenseSequence, signedData.Spec.LicenseSequence)
+	if outerData.LicenseSequence != signedData.Spec.LicenseSequence {
+		return &types.LicenseDataValidationError{
+			FieldName:   "licenseSequence",
+			SignedValue: fmt.Sprintf("%d", signedData.Spec.LicenseSequence),
+			ActualValue: fmt.Sprintf("%d", outerData.LicenseSequence),
+		}
 	}
-	if l.Spec.LicenseID != signedData.Spec.LicenseID {
-		return errors.Errorf(`"licenseID" field has changed to %q (license) from %q (within signature)`, l.Spec.LicenseID, signedData.Spec.LicenseID)
+	if outerData.LicenseID != signedData.Spec.LicenseID {
+		return &types.LicenseDataValidationError{
+			FieldName:   "licenseID",
+			SignedValue: signedData.Spec.LicenseID,
+			ActualValue: outerData.LicenseID,
+		}
 	}
-	if l.Spec.LicenseType != signedData.Spec.LicenseType {
-		return errors.Errorf(`"licenseType" field has changed to %q (license) from %q (within signature)`, l.Spec.LicenseType, signedData.Spec.LicenseType)
+	if outerData.LicenseType != signedData.Spec.LicenseType {
+		return &types.LicenseDataValidationError{
+			FieldName:   "licenseType",
+			SignedValue: signedData.Spec.LicenseType,
+			ActualValue: outerData.LicenseType,
+		}
 	}
-	if l.Spec.IsAirgapSupported != signedData.Spec.IsAirgapSupported {
-		return errors.Errorf(`"isAirgapSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsAirgapSupported, signedData.Spec.IsAirgapSupported)
+	if outerData.IsAirgapSupported != signedData.Spec.IsAirgapSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isAirgapSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsAirgapSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsAirgapSupported),
+		}
 	}
-	if l.Spec.IsGitOpsSupported != signedData.Spec.IsGitOpsSupported {
-		return errors.Errorf(`"isGitOpsSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsGitOpsSupported, signedData.Spec.IsGitOpsSupported)
+	if outerData.IsGitOpsSupported != signedData.Spec.IsGitOpsSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isGitOpsSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsGitOpsSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsGitOpsSupported),
+		}
 	}
-	if l.Spec.IsIdentityServiceSupported != signedData.Spec.IsIdentityServiceSupported {
-		return errors.Errorf(`"isIdentityServiceSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsIdentityServiceSupported, signedData.Spec.IsIdentityServiceSupported)
+	if outerData.IsIdentityServiceSupported != signedData.Spec.IsIdentityServiceSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isIdentityServiceSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsIdentityServiceSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsIdentityServiceSupported),
+		}
 	}
-	if l.Spec.IsGeoaxisSupported != signedData.Spec.IsGeoaxisSupported {
-		return errors.Errorf(`"isGeoaxisSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsGeoaxisSupported, signedData.Spec.IsGeoaxisSupported)
+	if outerData.IsGeoaxisSupported != signedData.Spec.IsGeoaxisSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isGeoaxisSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsGeoaxisSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsGeoaxisSupported),
+		}
 	}
-	if l.Spec.IsSnapshotSupported != signedData.Spec.IsSnapshotSupported {
-		return errors.Errorf(`"isSnapshotSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSnapshotSupported, signedData.Spec.IsSnapshotSupported)
+	if outerData.IsSnapshotSupported != signedData.Spec.IsSnapshotSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isSnapshotSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsSnapshotSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsSnapshotSupported),
+		}
 	}
-	if l.Spec.IsDisasterRecoverySupported != signedData.Spec.IsDisasterRecoverySupported {
-		return errors.Errorf(`"isDisasterRecoverySupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsDisasterRecoverySupported, signedData.Spec.IsDisasterRecoverySupported)
+	if outerData.IsDisasterRecoverySupported != signedData.Spec.IsDisasterRecoverySupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isDisasterRecoverySupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsDisasterRecoverySupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsDisasterRecoverySupported),
+		}
 	}
-	if l.Spec.IsSupportBundleUploadSupported != signedData.Spec.IsSupportBundleUploadSupported {
-		return errors.Errorf(`"isSupportBundleUploadSupported" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSupportBundleUploadSupported, signedData.Spec.IsSupportBundleUploadSupported)
+	if outerData.IsSupportBundleUploadSupported != signedData.Spec.IsSupportBundleUploadSupported {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isSupportBundleUploadSupported",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsSupportBundleUploadSupported),
+			ActualValue: fmt.Sprintf("%t", outerData.IsSupportBundleUploadSupported),
+		}
 	}
-	if l.Spec.IsSemverRequired != signedData.Spec.IsSemverRequired {
-		return errors.Errorf(`"isSemverRequired" field has changed to %t (license) from %t (within signature)`, l.Spec.IsSemverRequired, signedData.Spec.IsSemverRequired)
+	if outerData.IsSemverRequired != signedData.Spec.IsSemverRequired {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isSemverRequired",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsSemverRequired),
+			ActualValue: fmt.Sprintf("%t", outerData.IsSemverRequired),
+		}
 	}
-	if l.Spec.IsEmbeddedClusterDownloadEnabled != signedData.Spec.IsEmbeddedClusterDownloadEnabled {
-		return errors.Errorf(`"isEmbeddedClusterDownloadEnabled" field has changed to %t (license) from %t (within signature)`, l.Spec.IsEmbeddedClusterDownloadEnabled, signedData.Spec.IsEmbeddedClusterDownloadEnabled)
+	if outerData.IsEmbeddedClusterDownloadEnabled != signedData.Spec.IsEmbeddedClusterDownloadEnabled {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isEmbeddedClusterDownloadEnabled",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsEmbeddedClusterDownloadEnabled),
+			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterDownloadEnabled),
+		}
 	}
-	if l.Spec.IsEmbeddedClusterMultiNodeEnabled != signedData.Spec.IsEmbeddedClusterMultiNodeEnabled {
-		return errors.Errorf(`"isEmbeddedClusterMultiNodeEnabled" field has changed to %t (license) from %t (within signature)`, l.Spec.IsEmbeddedClusterMultiNodeEnabled, signedData.Spec.IsEmbeddedClusterMultiNodeEnabled)
+	if outerData.IsEmbeddedClusterMultiNodeEnabled != signedData.Spec.IsEmbeddedClusterMultiNodeEnabled {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isEmbeddedClusterMultiNodeEnabled",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsEmbeddedClusterMultiNodeEnabled),
+			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterMultiNodeEnabled),
+		}
 	}
 
 	// Compare channels (order matters for slices)
-	if len(l.Spec.Channels) != len(signedData.Spec.Channels) {
-		return errors.Errorf(`"channels" length has changed to %d (license) from %d (within signature)`, len(l.Spec.Channels), len(signedData.Spec.Channels))
+	if len(outerData.Channels) != len(signedData.Spec.Channels) {
+		return &types.LicenseDataValidationError{
+			FieldName:   "channels length",
+			SignedValue: fmt.Sprintf("%d", len(signedData.Spec.Channels)),
+			ActualValue: fmt.Sprintf("%d", len(outerData.Channels)),
+		}
 	}
-	for i, channel := range l.Spec.Channels {
+	for i, channel := range outerData.Channels {
 		if channel.ChannelID != signedData.Spec.Channels[i].ChannelID {
-			return errors.Errorf(`"channels[%d].channelID" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelID, signedData.Spec.Channels[i].ChannelID)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].channelID", i),
+				SignedValue: signedData.Spec.Channels[i].ChannelID,
+				ActualValue: channel.ChannelID,
+			}
 		}
 		if channel.ChannelName != signedData.Spec.Channels[i].ChannelName {
-			return errors.Errorf(`"channels[%d].channelName" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelName, signedData.Spec.Channels[i].ChannelName)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].channelName", i),
+				SignedValue: signedData.Spec.Channels[i].ChannelName,
+				ActualValue: channel.ChannelName,
+			}
 		}
 		if channel.ChannelSlug != signedData.Spec.Channels[i].ChannelSlug {
-			return errors.Errorf(`"channels[%d].channelSlug" field has changed to %q (license) from %q (within signature)`, i, channel.ChannelSlug, signedData.Spec.Channels[i].ChannelSlug)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].channelSlug", i),
+				SignedValue: signedData.Spec.Channels[i].ChannelSlug,
+				ActualValue: channel.ChannelSlug,
+			}
 		}
 		if channel.IsDefault != signedData.Spec.Channels[i].IsDefault {
-			return errors.Errorf(`"channels[%d].isDefault" field has changed to %t (license) from %t (within signature)`, i, channel.IsDefault, signedData.Spec.Channels[i].IsDefault)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].isDefault", i),
+				SignedValue: fmt.Sprintf("%t", signedData.Spec.Channels[i].IsDefault),
+				ActualValue: fmt.Sprintf("%t", channel.IsDefault),
+			}
 		}
 		if channel.Endpoint != signedData.Spec.Channels[i].Endpoint {
-			return errors.Errorf(`"channels[%d].endpoint" field has changed to %q (license) from %q (within signature)`, i, channel.Endpoint, signedData.Spec.Channels[i].Endpoint)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].endpoint", i),
+				SignedValue: signedData.Spec.Channels[i].Endpoint,
+				ActualValue: channel.Endpoint,
+			}
 		}
 		if channel.ReplicatedProxyDomain != signedData.Spec.Channels[i].ReplicatedProxyDomain {
-			return errors.Errorf(`"channels[%d].replicatedProxyDomain" field has changed to %q (license) from %q (within signature)`, i, channel.ReplicatedProxyDomain, signedData.Spec.Channels[i].ReplicatedProxyDomain)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].replicatedProxyDomain", i),
+				SignedValue: signedData.Spec.Channels[i].ReplicatedProxyDomain,
+				ActualValue: channel.ReplicatedProxyDomain,
+			}
 		}
 		if channel.IsSemverRequired != signedData.Spec.Channels[i].IsSemverRequired {
-			return errors.Errorf(`"channels[%d].isSemverRequired" field has changed to %t (license) from %t (within signature)`, i, channel.IsSemverRequired, signedData.Spec.Channels[i].IsSemverRequired)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("channels[%d].isSemverRequired", i),
+				SignedValue: fmt.Sprintf("%t", signedData.Spec.Channels[i].IsSemverRequired),
+				ActualValue: fmt.Sprintf("%t", channel.IsSemverRequired),
+			}
 		}
 	}
 
 	// Compare entitlements (order doesn't matter for maps)
-	if len(l.Spec.Entitlements) != len(signedData.Spec.Entitlements) {
-		return errors.Errorf(`"entitlements" length has changed to %d (license) from %d (within signature)`, len(l.Spec.Entitlements), len(signedData.Spec.Entitlements))
+	if len(outerData.Entitlements) != len(signedData.Spec.Entitlements) {
+		return &types.LicenseDataValidationError{
+			FieldName:   "entitlements length",
+			SignedValue: fmt.Sprintf("%d", len(signedData.Spec.Entitlements)),
+			ActualValue: fmt.Sprintf("%d", len(outerData.Entitlements)),
+		}
 	}
 	for fieldName, field := range l.Spec.Entitlements {
 		signedField, exists := signedData.Spec.Entitlements[fieldName]
 		if !exists {
-			return errors.Errorf(`"entitlements[%s]" field not found within signature`, fieldName)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s]", fieldName),
+				SignedValue: "",
+				ActualValue: "<missing>",
+			}
 		}
 		if field.Title != signedField.Title {
-			return errors.Errorf(`"entitlements[%s].title" field has changed to %q (license) from %q (within signature)`, fieldName, field.Title, signedField.Title)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].title", fieldName),
+				SignedValue: signedField.Title,
+				ActualValue: field.Title,
+			}
 		}
 		if field.Description != signedField.Description {
-			return errors.Errorf(`"entitlements[%s].description" field has changed to %q (license) from %q (within signature)`, fieldName, field.Description, signedField.Description)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].description", fieldName),
+				SignedValue: signedField.Description,
+				ActualValue: field.Description,
+			}
 		}
 		if field.ValueType != signedField.ValueType {
-			return errors.Errorf(`"entitlements[%s].valueType" field has changed to %q (license) from %q (within signature)`, fieldName, field.ValueType, signedField.ValueType)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].valueType", fieldName),
+				SignedValue: signedField.ValueType,
+				ActualValue: field.ValueType,
+			}
 		}
 		if field.IsHidden != signedField.IsHidden {
-			return errors.Errorf(`"entitlements[%s].isHidden" field has changed to %t (license) from %t (within signature)`, fieldName, field.IsHidden, signedField.IsHidden)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].isHidden", fieldName),
+				SignedValue: fmt.Sprintf("%t", signedField.IsHidden),
+				ActualValue: fmt.Sprintf("%t", field.IsHidden),
+			}
 		}
 		if field.Value.Type != signedField.Value.Type {
-			return errors.Errorf(`"entitlements[%s].value.type" field has changed to %d (license) from %d (within signature)`, fieldName, field.Value.Type, signedField.Value.Type)
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].value.type", fieldName),
+				SignedValue: fmt.Sprintf("%d", signedField.Value.Type),
+				ActualValue: fmt.Sprintf("%d", field.Value.Type),
+			}
 		}
 		if field.Value.Value() != signedField.Value.Value() {
-			return errors.Errorf(`"entitlements[%s].value" field has changed to %v (license) from %v (within signature)`, fieldName, field.Value.Value(), signedField.Value.Value())
+			return &types.LicenseDataValidationError{
+				FieldName:   fmt.Sprintf("entitlements[%s].value", fieldName),
+				SignedValue: fmt.Sprintf("%v", signedField.Value.Value()),
+				ActualValue: fmt.Sprintf("%v", field.Value.Value()),
+			}
 		}
 	}
 
