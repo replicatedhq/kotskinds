@@ -82,13 +82,13 @@ func (entitlementValue EntitlementValue) MarshalJSON() ([]byte, error) {
 }
 
 type EntitlementField struct {
-	Title       string                    `json:"title,omitempty"`
-	Description string                    `json:"description,omitempty"`
-	Value       EntitlementValue          `json:"-"`
-	ValueRaw    json.RawMessage           `json:"value,omitempty"`
-	ValueType   string                    `json:"valueType,omitempty"`
-	IsHidden    bool                      `json:"isHidden,omitempty"`
-	Signature   EntitlementFieldSignature `json:"signature,omitempty"`
+	Title       string                     `json:"title,omitempty"`
+	Description string                     `json:"description,omitempty"`
+	Value       EntitlementValue           `json:"-"`
+	ValueRaw    json.RawMessage            `json:"value,omitempty"`
+	ValueType   string                     `json:"valueType,omitempty"`
+	IsHidden    bool                       `json:"isHidden,omitempty"`
+	Signature   *EntitlementFieldSignature `json:"signature,omitempty"`
 }
 
 func (ef *EntitlementField) UnmarshalJSON(data []byte) error {
@@ -123,8 +123,8 @@ func (ef *EntitlementField) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON implements custom JSON marshaling for EntitlementField.
-// This ensures that entitlement values and signatures are correctly marshaled
-// whether the license was loaded from YAML/JSON or created programmatically in code.
+// This ensures that entitlement values are correctly marshaled whether the
+// license was loaded from YAML/JSON or created programmatically in code.
 func (ef EntitlementField) MarshalJSON() ([]byte, error) {
 	// Define a type alias to prevent infinite recursion
 	type Alias EntitlementField
@@ -139,24 +139,9 @@ func (ef EntitlementField) MarshalJSON() ([]byte, error) {
 		ef.ValueRaw = valueBytes
 	}
 
-	// Marshal using the alias to get initial JSON
-	data, err := json.Marshal((Alias)(ef))
-	if err != nil {
-		return nil, err
-	}
-
-	// If the signature is empty, remove it from the JSON output
-	// This ensures backwards compatibility with older licenses that don't have signatures
-	if len(ef.Signature.V1) == 0 {
-		var m map[string]json.RawMessage
-		if err := json.Unmarshal(data, &m); err != nil {
-			return nil, err
-		}
-		delete(m, "signature")
-		return json.Marshal(m)
-	}
-
-	return data, nil
+	// Use the alias type to marshal all fields with standard behavior
+	// The Signature field is now a pointer, so omitempty will work correctly
+	return json.Marshal((Alias)(ef))
 }
 
 // unmarshalEntitlementValue manually unmarshals a value into an EntitlementValue
@@ -301,7 +286,7 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 	// validate that each entitlement value is signed by the application key
 	for fieldName, field := range l.Spec.Entitlements {
 		// the entitlement values are still covered as part of the entire license body, and some old license files did not include entitlement signatures
-		if len(field.Signature.V1) == 0 {
+		if field.Signature == nil || len(field.Signature.V1) == 0 {
 			continue
 		}
 		if err := field.ValidateSignature(appKeys); err != nil {
@@ -320,7 +305,7 @@ func (l *License) ValidateLicense() (*kotscrypto.AppSigningKeys, error) {
 // ValidateSignature validates a single v1beta1 entitlement signature
 func (in *EntitlementField) ValidateSignature(appKeys *kotscrypto.AppSigningKeys) error {
 	// Check if signature is present
-	if len(in.Signature.V1) == 0 {
+	if in.Signature == nil || len(in.Signature.V1) == 0 {
 		return errors.New("v1 signature not found for entitlement")
 	}
 

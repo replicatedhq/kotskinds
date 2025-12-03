@@ -295,8 +295,8 @@ func TestMissingSignatureMarshaling(t *testing.T) {
 			field, ok := unmarshaled.Spec.Entitlements["test-field"]
 			require.True(t, ok, "entitlement should exist after round-trip")
 
-			// Verify that the signature remains empty
-			assert.Equal(t, 0, len(field.Signature.V1), "signature should remain empty after round-trip")
+			// Verify that the signature remains nil
+			assert.Nil(t, field.Signature, "signature should remain nil after round-trip")
 
 			// Verify other fields are preserved
 			assert.Equal(t, tt.entitlement.Title, field.Title, "title should be preserved")
