@@ -237,3 +237,72 @@ func TestProgrammaticEntitlementMarshaling(t *testing.T) {
 		})
 	}
 }
+
+// TestMissingSignatureMarshaling tests that entitlements without signatures
+// are correctly marshaled and unmarshaled, ensuring backwards compatibility
+// with older licenses that don't have individual entitlement signatures.
+func TestMissingSignatureMarshaling(t *testing.T) {
+	tests := []struct {
+		name        string
+		entitlement kotsv1beta1.EntitlementField
+	}{
+		{
+			name: "entitlement without signature",
+			entitlement: kotsv1beta1.EntitlementField{
+				Title:       "Test Field",
+				Description: "A test entitlement without signature",
+				Value: kotsv1beta1.EntitlementValue{
+					Type:   kotsv1beta1.String,
+					StrVal: "test-value",
+				},
+				ValueType: "String",
+				// No Signature field set - simulating older licenses
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a license with an entitlement without signature
+			license := &kotsv1beta1.License{
+				Spec: kotsv1beta1.LicenseSpec{
+					LicenseID: "test-license",
+					AppSlug:   "test-app",
+					Entitlements: map[string]kotsv1beta1.EntitlementField{
+						"test-field": tt.entitlement,
+					},
+				},
+			}
+
+			// Marshal to YAML
+			kotsscheme.AddToScheme(scheme.Scheme)
+			s := scheme.Codecs.LegacyCodec(kotsv1beta1.SchemeGroupVersion)
+			var buf bytes.Buffer
+			err := s.Encode(license, &buf)
+			require.NoError(t, err, "should be able to marshal license without signature")
+			yamlBytes := buf.Bytes()
+
+			// Verify that the signature field is not present in the output
+			yamlStr := string(yamlBytes)
+			assert.NotContains(t, yamlStr, "signature:", "signature field should not appear in marshaled output")
+
+			// Unmarshal back
+			decode := scheme.Codecs.UniversalDeserializer().Decode
+			obj, _, err := decode(yamlBytes, nil, nil)
+			require.NoError(t, err, "should be able to unmarshal license without signature")
+
+			unmarshaled := obj.(*kotsv1beta1.License)
+			field, ok := unmarshaled.Spec.Entitlements["test-field"]
+			require.True(t, ok, "entitlement should exist after round-trip")
+
+			// Verify that the signature remains empty
+			assert.Equal(t, 0, len(field.Signature.V1), "signature should remain empty after round-trip")
+
+			// Verify other fields are preserved
+			assert.Equal(t, tt.entitlement.Title, field.Title, "title should be preserved")
+			assert.Equal(t, tt.entitlement.Description, field.Description, "description should be preserved")
+			assert.Equal(t, tt.entitlement.ValueType, field.ValueType, "value type should be preserved")
+			assert.Equal(t, "test-value", field.Value.Value(), "value should be preserved")
+		})
+	}
+}
