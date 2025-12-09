@@ -20,6 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type Architecture string
+
+const (
+	ArchitectureAmd64 Architecture = "amd64"
+	ArchitectureArm64 Architecture = "arm64"
+)
+
 // AirgapSpec defines the desired state of AirgapSpec
 type AirgapSpec struct {
 	AirgapReleaseMeta        `json:",inline"`
@@ -32,6 +39,7 @@ type AirgapSpec struct {
 	SavedImages              []string                  `json:"savedImages,omitempty"`
 	EmbeddedClusterArtifacts *EmbeddedClusterArtifacts `json:"embeddedClusterArtifacts,omitempty"`
 	UncompressedSize         int64                     `json:"uncompressedSize,omitempty"`
+	Architecture             Architecture              `json:"architecture,omitempty"`
 	Format                   string                    `json:"format,omitempty"`
 	ReplicatedChartNames     []string                  `json:"replicatedChartNames,omitempty"`
 }
