@@ -71,6 +71,10 @@ func (c *FakeKotsV1beta1) LintConfigs(namespace string) v1beta1.LintConfigInterf
 	return newFakeLintConfigs(c, namespace)
 }
 
+func (c *FakeKotsV1beta1) Terraforms(namespace string) v1beta1.TerraformInterface {
+	return newFakeTerraforms(c, namespace)
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeKotsV1beta1) RESTClient() rest.Interface {
