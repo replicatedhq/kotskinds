@@ -136,6 +136,10 @@ spec:
                 - chartVersion
                 - name
                 type: object
+              docs:
+                additionalProperties:
+                  type: string
+                type: object
               exclude:
                 type: BoolString
               helmUpgradeFlags:

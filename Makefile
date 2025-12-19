@@ -13,11 +13,11 @@ generate: controller-gen client-gen
 		paths=./apis/kots/v1beta2/...
 	$(CLIENT_GEN) \
 		--output-pkg=github.com/replicatedhq/kotskinds/client \
-		--output-dir ./client \
-		--clientset-name kotsclientset \
-		--input-base github.com/replicatedhq/kotskinds/apis \
-		--input kots/v1beta1,kots/v1beta2 \
-		--go-header-file ./hack/boilerplate.go.txt
+		--output-dir=./client \
+		--clientset-name=kotsclientset \
+		--input-base=github.com/replicatedhq/kotskinds/apis \
+		--input=kots/v1beta1,kots/v1beta2 \
+		--go-header-file=./hack/boilerplate.go.txt
 
 
 .PHONY: openapischema
