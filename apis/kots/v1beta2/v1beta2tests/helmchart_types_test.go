@@ -124,17 +124,17 @@ spec:
 
 	require.NotNil(t, helmChart.Spec.Docs)
 	assert.Equal(t, 3, len(helmChart.Spec.Docs))
-	
+
 	installDoc, ok := helmChart.Spec.Docs["install"]
 	require.True(t, ok)
 	assert.Contains(t, installDoc, "Installation Guide")
 	assert.Contains(t, installDoc, "Kubernetes 1.24+")
-	
+
 	prereqDoc, ok := helmChart.Spec.Docs["prerequisites"]
 	require.True(t, ok)
 	assert.Contains(t, prereqDoc, "Requirements")
 	assert.Contains(t, prereqDoc, "storage class")
-	
+
 	troubleshootingDoc, ok := helmChart.Spec.Docs["troubleshooting"]
 	require.True(t, ok)
 	assert.Contains(t, troubleshootingDoc, "Common Issues")
