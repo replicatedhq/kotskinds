@@ -17,7 +17,9 @@
       "description": "TerraformSpec defines the desired state of Terraform",
       "type": "object",
       "required": [
-        "filename"
+        "name",
+        "provider",
+        "sourceRepository"
       ],
       "properties": {
         "docs": {
@@ -27,12 +29,28 @@
             "type": "string"
           }
         },
-        "filename": {
-          "description": "Filename references a .tgz file containing Terraform modules",
-          "type": "string"
-        },
         "minTerraformVersion": {
           "description": "MinTerraformVersion specifies the minimum Terraform version required",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the stable, vendor-defined module name",
+          "type": "string"
+        },
+        "provider": {
+          "description": "Provider is the Terraform provider (aws, gcp, azurerm, etc.)",
+          "type": "string"
+        },
+        "sourcePath": {
+          "description": "SourcePath is the path within the git repository to the Terraform module (defaults to root)",
+          "type": "string"
+        },
+        "sourceRef": {
+          "description": "SourceRef is the git reference (tag, branch, or commit) to use (defaults to default branch)",
+          "type": "string"
+        },
+        "sourceRepository": {
+          "description": "SourceRepository is the git repository URL containing the Terraform module source",
           "type": "string"
         }
       }
