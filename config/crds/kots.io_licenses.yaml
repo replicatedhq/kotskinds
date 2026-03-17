@@ -108,6 +108,8 @@ spec:
                 type: boolean
               isEmbeddedClusterMultiNodeEnabled:
                 type: boolean
+              isEmbeddedClusterRookEnabled:
+                type: boolean
               isGeoaxisSupported:
                 type: boolean
               isGitOpsSupported:
@@ -236,6 +238,8 @@ spec:
               isEmbeddedClusterDownloadEnabled:
                 type: boolean
               isEmbeddedClusterMultiNodeEnabled:
+                type: boolean
+              isEmbeddedClusterRookEnabled:
                 type: boolean
               isGeoaxisSupported:
                 type: boolean

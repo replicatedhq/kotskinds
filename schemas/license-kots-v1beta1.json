@@ -121,6 +121,9 @@
         "isEmbeddedClusterMultiNodeEnabled": {
           "type": "boolean"
         },
+        "isEmbeddedClusterRookEnabled": {
+          "type": "boolean"
+        },
         "isGeoaxisSupported": {
           "type": "boolean"
         },
