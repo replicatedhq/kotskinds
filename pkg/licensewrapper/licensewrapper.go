@@ -302,6 +302,17 @@ func (w LicenseWrapper) IsEmbeddedClusterMultiNodeEnabled() bool {
 	return false
 }
 
+// IsEmbeddedClusterRookEnabled returns whether embedded cluster rook is enabled from whichever version is present
+func (w LicenseWrapper) IsEmbeddedClusterRookEnabled() bool {
+	if w.V1 != nil {
+		return w.V1.Spec.IsEmbeddedClusterRookEnabled
+	}
+	if w.V2 != nil {
+		return w.V2.Spec.IsEmbeddedClusterRookEnabled
+	}
+	return false
+}
+
 // GetEntitlements returns the entitlements map from whichever version is present
 // Returns wrapped entitlements for version-agnostic access
 func (w LicenseWrapper) GetEntitlements() map[string]EntitlementFieldWrapper {

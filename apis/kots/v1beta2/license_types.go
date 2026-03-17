@@ -137,6 +137,7 @@ type LicenseSpec struct {
 	IsSemverRequired                  bool                        `json:"isSemverRequired,omitempty"`
 	IsEmbeddedClusterDownloadEnabled  bool                        `json:"isEmbeddedClusterDownloadEnabled,omitempty"`
 	IsEmbeddedClusterMultiNodeEnabled bool                        `json:"isEmbeddedClusterMultiNodeEnabled,omitempty"`
+	IsEmbeddedClusterRookEnabled      bool                        `json:"isEmbeddedClusterRookEnabled,omitempty"`
 	Entitlements                      map[string]EntitlementField `json:"entitlements,omitempty"`
 }
 
@@ -407,6 +408,13 @@ func (l *License) compareLicenseData(signedJSON []byte) error {
 			FieldName:   "isEmbeddedClusterMultiNodeEnabled",
 			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsEmbeddedClusterMultiNodeEnabled),
 			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterMultiNodeEnabled),
+		}
+	}
+	if outerData.IsEmbeddedClusterRookEnabled != signedData.Spec.IsEmbeddedClusterRookEnabled {
+		return &types.LicenseDataValidationError{
+			FieldName:   "isEmbeddedClusterRookEnabled",
+			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsEmbeddedClusterRookEnabled),
+			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterRookEnabled),
 		}
 	}
 
