@@ -410,13 +410,6 @@ func (l *License) compareLicenseData(signedJSON []byte) error {
 			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterMultiNodeEnabled),
 		}
 	}
-	if outerData.IsEmbeddedClusterRookEnabled != signedData.Spec.IsEmbeddedClusterRookEnabled {
-		return &types.LicenseDataValidationError{
-			FieldName:   "isEmbeddedClusterRookEnabled",
-			SignedValue: fmt.Sprintf("%t", signedData.Spec.IsEmbeddedClusterRookEnabled),
-			ActualValue: fmt.Sprintf("%t", outerData.IsEmbeddedClusterRookEnabled),
-		}
-	}
 
 	// Compare channels (order matters for slices)
 	if len(outerData.Channels) != len(signedData.Spec.Channels) {
