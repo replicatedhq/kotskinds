@@ -397,9 +397,14 @@ type OptionalValue struct {
 	Values map[string]MappedChartValue `json:"values,omitempty"`
 
 	// valuesString holds the raw scalar form of values when it is provided as a string, e.g. a
-	// `repl{{ ConfigOption "x" | nindent 8 }}` template that renders to a map at install time. The
-	// Vendor Portal validates specs before template rendering, so it must tolerate this form
-	// instead of dropping the whole HelmChart CR. Exactly one of Values / valuesString is ever set.
+	// `repl{{ ConfigOption "x" | nindent 8 }}` template. The scalar is stored VERBATIM: this type
+	// never parses or template-evaluates it (its contents are not interpreted as JSON or YAML). It
+	// exists only so the pre-render validation path (Vendor Portal) tolerates the scalar instead of
+	// dropping the whole HelmChart CR; it is read back only by ValuesString() and re-emitted verbatim
+	// by MarshalJSON. The actual render-then-reparse happens in KOTS at install, at the manifest-text
+	// level: `repl{{ ... | nindent N }}` renders into indented YAML in the document, so KOTS's normal
+	// decode sees a real map node and populates Values (the map branch), never this string branch.
+	// Exactly one of Values / valuesString is ever set.
 	valuesString string `json:"-"`
 }
 
