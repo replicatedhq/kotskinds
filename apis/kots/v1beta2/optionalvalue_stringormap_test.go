@@ -83,3 +83,26 @@ func Test_HelmChartSpec_ToleratesTemplatedScalarOptionalValues(t *testing.T) {
 	require.Len(t, s.OptionalValues, 1)
 	assert.Nil(t, s.OptionalValues[0].Values, "templated scalar leaves the typed map empty")
 }
+
+// Test_OptionalValue_DeepCopyPreservesValuesString locks the invariant that a scalar values
+// survives DeepCopy/DeepCopyInto. Correctness holds today only because valuesString is a value-type
+// string copied by the generated `*out = *in`; this test fails loudly if that ever stops being true
+// (e.g. the field becomes a pointer/slice and the generated deepcopy stops covering it).
+func Test_OptionalValue_DeepCopyPreservesValuesString(t *testing.T) {
+	var ov OptionalValue
+	require.NoError(t, json.Unmarshal([]byte(`{"when":"true","values":"repl{{ ConfigOption \"override\" | nindent 8 }}"}`), &ov))
+	require.NotEmpty(t, ov.ValuesString())
+
+	cp := ov.DeepCopy()
+	assert.Equal(t, ov.ValuesString(), cp.ValuesString(), "scalar must survive DeepCopy")
+
+	var into OptionalValue
+	ov.DeepCopyInto(&into)
+	assert.Equal(t, ov.ValuesString(), into.ValuesString(), "scalar must survive DeepCopyInto")
+
+	orig, err := json.Marshal(ov)
+	require.NoError(t, err)
+	copied, err := json.Marshal(cp)
+	require.NoError(t, err)
+	assert.JSONEq(t, string(orig), string(copied), "a deep copy must re-marshal identically")
+}

@@ -444,7 +444,17 @@ func (o *OptionalValue) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	return errors.Errorf("optionalValues[].values must be a map or a string, got %q", trimmed)
+	return errors.Errorf("optionalValues[].values must be a map or a string, got %q", truncateForError(trimmed))
+}
+
+// truncateForError bounds an untrusted value before it lands in an error message, so a huge invalid
+// payload can't bloat logs. %q escaping still applies at the call site.
+func truncateForError(s string) string {
+	const max = 64
+	if len(s) <= max {
+		return s
+	}
+	return s[:max] + "…"
 }
 
 // MarshalJSON re-emits values in whichever form it was decoded from, so a round-trip is lossless.
