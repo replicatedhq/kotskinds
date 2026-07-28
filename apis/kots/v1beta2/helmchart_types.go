@@ -388,7 +388,90 @@ type OptionalValue struct {
 	When           string `json:"when"`
 	RecursiveMerge bool   `json:"recursiveMerge"`
 
+	// Values holds the map form of the optional values. This is the form KOTS decodes at install
+	// time, because templates are rendered before the manifest is unmarshalled.
 	Values map[string]MappedChartValue `json:"values,omitempty"`
+
+	// valuesString holds the raw scalar form of values when it is provided as a string, e.g. a
+	// `repl{{ ConfigOption "x" | nindent 8 }}` template that renders to a map at install time. The
+	// Vendor Portal validates specs before template rendering, so it must tolerate this form
+	// instead of dropping the whole HelmChart CR. Exactly one of Values / valuesString is ever set.
+	valuesString string `json:"-"`
+}
+
+// optionalValueJSON mirrors OptionalValue's serialized shape but with values left as a raw message
+// so UnmarshalJSON can decode either a map or a scalar string without recursing into OptionalValue.
+type optionalValueJSON struct {
+	When           string          `json:"when"`
+	RecursiveMerge bool            `json:"recursiveMerge"`
+	Values         json.RawMessage `json:"values,omitempty"`
+}
+
+// UnmarshalJSON tolerates spec.optionalValues[].values being either a map (the rendered form) or a
+// scalar string (a repl template the Vendor Portal sees before rendering). A scalar is stored as a
+// string and leaves Values nil (type-indeterminate) so the CR still decodes and is not dropped.
+func (o *OptionalValue) UnmarshalJSON(data []byte) error {
+	var raw optionalValueJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	o.When = raw.When
+	o.RecursiveMerge = raw.RecursiveMerge
+	o.Values = nil
+	o.valuesString = ""
+
+	trimmed := strings.TrimSpace(string(raw.Values))
+	if trimmed == "" || trimmed == "null" {
+		return nil
+	}
+
+	// Prefer the map form. Fall back to a scalar string (e.g. a repl template) rather than failing
+	// the decode and dropping the chart.
+	var values map[string]MappedChartValue
+	if err := json.Unmarshal(raw.Values, &values); err == nil {
+		o.Values = values
+		return nil
+	}
+
+	var str string
+	if err := json.Unmarshal(raw.Values, &str); err == nil {
+		o.valuesString = str
+		return nil
+	}
+
+	return errors.Errorf("optionalValues[].values must be a map or a string, got %q", trimmed)
+}
+
+// MarshalJSON re-emits values in whichever form it was decoded from, so a round-trip is lossless.
+func (o OptionalValue) MarshalJSON() ([]byte, error) {
+	raw := optionalValueJSON{
+		When:           o.When,
+		RecursiveMerge: o.RecursiveMerge,
+	}
+
+	switch {
+	case o.valuesString != "":
+		encoded, err := json.Marshal(o.valuesString)
+		if err != nil {
+			return nil, err
+		}
+		raw.Values = encoded
+	case o.Values != nil:
+		encoded, err := json.Marshal(o.Values)
+		if err != nil {
+			return nil, err
+		}
+		raw.Values = encoded
+	}
+
+	return json.Marshal(raw)
+}
+
+// ValuesString returns the raw scalar form of optionalValues[].values (a repl template) when values
+// was provided as a string rather than a map; it returns "" for the map form.
+func (o *OptionalValue) ValuesString() string {
+	return o.valuesString
 }
 
 // HelmChartSpec defines the desired state of HelmChartSpec
