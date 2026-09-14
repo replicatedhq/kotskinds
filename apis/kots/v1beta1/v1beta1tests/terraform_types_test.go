@@ -16,8 +16,20 @@ kind: Terraform
 metadata:
   name: aws-infra
 spec:
-  # filename references a .tgz file containing Terraform modules
-  filename: terraform-module-v1.0.0.tgz
+  # name is the stable, vendor-defined module name
+  name: "aws-infrastructure"
+
+  # provider is the Terraform provider
+  provider: "aws"
+
+  # sourceRepository is the git repository URL containing the Terraform module source
+  sourceRepository: "https://github.com/acme-corp/my-application"
+
+  # sourcePath is the path within the git repository to the Terraform module
+  sourcePath: "terraform/aws"
+
+  # sourceRef is the git reference (tag, branch, or commit) to use
+  sourceRef: "v1.0.0"
 
   # minTerraformVersion specifies the minimum Terraform version required
   minTerraformVersion: "1.0.0"
@@ -69,7 +81,11 @@ spec:
 	terraform := obj.(*kotsv1beta1.Terraform)
 
 	assert.Equal(t, "aws-infra", terraform.Name)
-	assert.Equal(t, "terraform-module-v1.0.0.tgz", terraform.Spec.Filename)
+	assert.Equal(t, "aws-infrastructure", terraform.Spec.Name)
+	assert.Equal(t, "aws", terraform.Spec.Provider)
+	assert.Equal(t, "https://github.com/acme-corp/my-application", terraform.Spec.SourceRepository)
+	assert.Equal(t, "terraform/aws", terraform.Spec.SourcePath)
+	assert.Equal(t, "v1.0.0", terraform.Spec.SourceRef)
 	assert.Equal(t, "1.0.0", terraform.Spec.MinTerraformVersion)
 
 	require.NotNil(t, terraform.Spec.Docs)
@@ -85,7 +101,9 @@ kind: Terraform
 metadata:
   name: simple-terraform
 spec:
-  filename: simple-module.tgz
+  name: "simple-module"
+  provider: "aws"
+  sourceRepository: "https://github.com/vendor/simple-app"
 `
 
 	kotsscheme.AddToScheme(scheme.Scheme)
@@ -101,7 +119,11 @@ spec:
 	terraform := obj.(*kotsv1beta1.Terraform)
 
 	assert.Equal(t, "simple-terraform", terraform.Name)
-	assert.Equal(t, "simple-module.tgz", terraform.Spec.Filename)
+	assert.Equal(t, "simple-module", terraform.Spec.Name)
+	assert.Equal(t, "aws", terraform.Spec.Provider)
+	assert.Equal(t, "https://github.com/vendor/simple-app", terraform.Spec.SourceRepository)
+	assert.Empty(t, terraform.Spec.SourcePath)
+	assert.Empty(t, terraform.Spec.SourceRef)
 	assert.Empty(t, terraform.Spec.MinTerraformVersion)
 	assert.Nil(t, terraform.Spec.Docs)
 }
@@ -112,7 +134,11 @@ kind: Terraform
 metadata:
   name: terraform-with-docs
 spec:
-  filename: module.tgz
+  name: "documented-module"
+  provider: "gcp"
+  sourceRepository: "https://github.com/vendor/documented-app"
+  sourcePath: "terraform/gcp"
+  sourceRef: "v2.1.0"
   docs:
     setup: "Run terraform init and terraform apply to set up the infrastructure."
     teardown: "Run terraform destroy to remove all resources."
@@ -131,7 +157,11 @@ spec:
 	terraform := obj.(*kotsv1beta1.Terraform)
 
 	assert.Equal(t, "terraform-with-docs", terraform.Name)
-	assert.Equal(t, "module.tgz", terraform.Spec.Filename)
+	assert.Equal(t, "documented-module", terraform.Spec.Name)
+	assert.Equal(t, "gcp", terraform.Spec.Provider)
+	assert.Equal(t, "https://github.com/vendor/documented-app", terraform.Spec.SourceRepository)
+	assert.Equal(t, "terraform/gcp", terraform.Spec.SourcePath)
+	assert.Equal(t, "v2.1.0", terraform.Spec.SourceRef)
 	assert.Empty(t, terraform.Spec.MinTerraformVersion)
 
 	require.NotNil(t, terraform.Spec.Docs)

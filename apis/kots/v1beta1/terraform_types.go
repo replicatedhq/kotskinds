@@ -22,8 +22,20 @@ import (
 
 // TerraformSpec defines the desired state of Terraform
 type TerraformSpec struct {
-	// Filename references a .tgz file containing Terraform modules
-	Filename string `json:"filename"`
+	// Name is the stable, vendor-defined module name
+	Name string `json:"name"`
+
+	// Provider is the Terraform provider (aws, gcp, azurerm, etc.)
+	Provider string `json:"provider"`
+
+	// SourceRepository is the git repository URL containing the Terraform module source
+	SourceRepository string `json:"sourceRepository"`
+
+	// SourcePath is the path within the git repository to the Terraform module (defaults to root)
+	SourcePath string `json:"sourcePath,omitempty"`
+
+	// SourceRef is the git reference (tag, branch, or commit) to use (defaults to default branch)
+	SourceRef string `json:"sourceRef,omitempty"`
 
 	// MinTerraformVersion specifies the minimum Terraform version required
 	MinTerraformVersion string `json:"minTerraformVersion,omitempty"`
