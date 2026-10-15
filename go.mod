@@ -3,7 +3,7 @@ module github.com/replicatedhq/kotskinds
 go 1.26.0
 
 require (
-	github.com/go-test/deep v1.1.1
+	github.com/go-test/deep v1.1.2
 	github.com/google/gofuzz v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
@@ -42,7 +42,7 @@ require (
 	github.com/go-openapi/testify/enable/yaml/v2 v2.8.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
-	github.com/google/pprof v0.0.0-20261008003335-7bae8d8c4c9e // indirect
+	github.com/google/pprof v0.0.0-20261012231050-2af12c3f4d87 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
