@@ -1,6 +1,6 @@
 module github.com/replicatedhq/kotskinds
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/go-test/deep v1.1.2
